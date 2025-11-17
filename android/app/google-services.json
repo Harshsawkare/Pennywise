@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "382160724791",
+    "project_id": "pennywise-money-tracker",
+    "storage_bucket": "pennywise-money-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382160724791:android:35b4ba271adc410b1730b2",
+        "android_client_info": {
+          "package_name": "com.pennywise.pennywise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBEG4p1pe7SnRFXVix_zW2iTCWrq6lsKY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
