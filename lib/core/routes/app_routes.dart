@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/screens/login_screen.dart';
 import '../../presentation/screens/signup_screen.dart';
 import '../../presentation/screens/main_navigation_screen.dart';
+import '../../presentation/screens/sheet_entries_screen.dart';
+import '../../presentation/screens/add_entry_screen.dart';
+import '../../domain/models/sheet_model.dart';
 import '../notifiers/auth_state_notifier.dart';
 import '../di/service_locator.dart';
 
@@ -16,6 +19,8 @@ class AppRoutes {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String home = '/home';
+  static const String sheetEntries = '/sheet/:sheetId';
+  static const String addEntry = '/add-entry';
 
   /// Get the GoRouter configuration
   /// [authStateNotifier] - Optional auth state notifier for listening to auth changes
@@ -73,6 +78,37 @@ class AppRoutes {
             }
             return const MainNavigationScreen();
           },
+          routes: [
+            GoRoute(
+              path: 'sheet/:sheetId',
+              name: 'sheetEntries',
+              builder: (context, state) {
+                final sheetId = state.pathParameters['sheetId'] ?? '';
+                // Get sheet from extra state if provided, otherwise create placeholder
+                // The controller will load the actual sheet data
+                final sheet = state.extra as SheetModel? ??
+                    SheetModel(
+                      id: sheetId,
+                      name: 'Sheet', // Will be loaded by controller
+                      totalAmount: 0.0,
+                      createdOn: DateTime.now(),
+                      updatedOn: DateTime.now(),
+                      userId: '',
+                      totalIncome: 0.0,
+                      totalExpense: 0.0,
+                    );
+                return SheetEntriesScreen(sheet: sheet);
+              },
+            ),
+            GoRoute(
+              path: 'add-entry',
+              name: 'addEntry',
+              builder: (context, state) {
+                final sheetId = state.uri.queryParameters['sheetId'];
+                return AddEntryScreen(sheetId: sheetId);
+              },
+            ),
+          ],
         ),
       ],
       // Redirect unknown routes to login

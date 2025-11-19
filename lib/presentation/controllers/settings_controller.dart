@@ -5,7 +5,6 @@ import '../../core/routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../domain/models/user_model.dart';
 
 /// Settings controller managing the state and business logic for the settings screen
 /// Follows GetX state management pattern and SOLID principles

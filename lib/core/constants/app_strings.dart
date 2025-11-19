@@ -40,5 +40,22 @@ class AppStrings {
 
   // Sheets Screen
   static const String addSheet = 'Add Sheet.';
+  static const String addSheetName = 'Add sheet name.';
+  static const String sheetNamePlaceholder = 'Seoul-ful Trip';
+  static const String cancel = 'Cancel';
+  static const String create = 'Create';
+  static const String allCategories = 'All categories';
+
+  // Add Entry Screen
+  static const String newEntry = 'New Entry';
+  static const String expense = 'Expense';
+  static const String income = 'Income';
+  static const String howMuch = 'How much?';
+  static const String note = 'Note';
+  static const String date = 'Date';
+  static const String time = 'Time';
+  static const String add = 'Add';
+  static const String addEntry = 'Add Entry.';
+  static const String foodAndDrink = 'Food and Drink';
 }
 

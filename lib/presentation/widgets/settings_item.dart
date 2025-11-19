@@ -54,7 +54,7 @@ class SettingsItem extends StatelessWidget {
           color: AppColors.whiteColor,
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           border: Border.all(
-            color: AppColors.blackColor,
+            color: AppColors.lightGreyColor,
             width: 1.0,
           ),
         ),

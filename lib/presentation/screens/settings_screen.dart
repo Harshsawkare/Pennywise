@@ -82,16 +82,16 @@ class SettingsScreen extends StatelessWidget {
                 showArrow: true,
               ),
 
-              const SizedBox(height: AppConstants.verticalSpacing),
-
-              Obx(
-                () => SettingsItem(
-                  title: AppStrings.currency,
-                  badge: controller.selectedCurrency.value,
-                  onTap: controller.navigateToCurrency,
-                  showArrow: false,
-                ),
-              ),
+              // const SizedBox(height: AppConstants.verticalSpacing),
+              //
+              // Obx(
+              //   () => SettingsItem(
+              //     title: AppStrings.currency,
+              //     badge: controller.selectedCurrency.value,
+              //     onTap: controller.navigateToCurrency,
+              //     showArrow: false,
+              //   ),
+              // ),
 
               const SizedBox(height: AppConstants.verticalSpacing),
 

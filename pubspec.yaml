@@ -51,6 +51,9 @@ dependencies:
   
   # UUID generation for user IDs
   uuid: ^4.5.1
+  
+  # Date and number formatting
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

@@ -32,6 +32,9 @@ class CustomTextField extends StatelessWidget {
   /// Callback to toggle password visibility
   final VoidCallback? onTogglePasswordVisibility;
 
+  /// Keyboard type for the text field
+  final TextInputType? keyboardType;
+
   const CustomTextField({
     super.key,
     required this.placeholder,
@@ -43,6 +46,7 @@ class CustomTextField extends StatelessWidget {
     this.showPasswordToggle = false,
     this.isPasswordVisible = false,
     this.onTogglePasswordVisibility,
+    this.keyboardType,
   });
 
   @override
@@ -63,6 +67,7 @@ class CustomTextField extends StatelessWidget {
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         obscureText: isPassword && !isPasswordVisible,
+        keyboardType: keyboardType,
         style: const TextStyle(
           color: AppColors.blackColor,
           fontSize: 14,

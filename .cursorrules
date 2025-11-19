@@ -1,0 +1,384 @@
+# Pennywise Flutter Project - Cursor Rules
+
+## Architecture Overview
+This project follows **Clean Architecture** with three main layers:
+- **Domain Layer** (`lib/domain/`): Business logic, models, and repository interfaces
+- **Data Layer** (`lib/data/`): Repository implementations and data sources
+- **Presentation Layer** (`lib/presentation/`): UI screens, controllers, and widgets
+- **Core Layer** (`lib/core/`): Shared utilities, services, DI, routes, theme, and constants
+
+## SOLID Principles
+
+### Single Responsibility Principle (SRP)
+- Each class should have one reason to change
+- Controllers handle only UI state and business logic coordination
+- Services contain use case logic
+- Repositories handle data operations only
+- Widgets are responsible for rendering only
+
+### Open/Closed Principle (OCP)
+- Use abstract interfaces in domain layer
+- Implement interfaces in data layer
+- Extend functionality through composition, not modification
+
+### Liskov Substitution Principle (LSP)
+- Repository implementations must fully satisfy their interface contracts
+- All implementations should be interchangeable without breaking functionality
+
+### Interface Segregation Principle (ISP)
+- Create focused, specific interfaces rather than large general ones
+- Domain repositories should contain only methods relevant to their domain
+
+### Dependency Inversion Principle (DIP)
+- High-level modules (presentation) depend on abstractions (domain interfaces)
+- Low-level modules (data) implement abstractions
+- Use dependency injection via ServiceLocator for all dependencies
+
+## State Management
+
+### GetX Controllers
+- All presentation controllers must extend `GetxController`
+- Use `Rx<T>` for observable state variables
+- Controllers should be lightweight and delegate business logic to services
+- Use `Get.put()` or `Get.find()` for controller initialization in screens
+- Controllers should not directly access repositories - use services instead
+
+### Controller Pattern
+```dart
+class ExampleController extends GetxController {
+  final ExampleService _service;
+  final Rx<ExampleModel?> data = Rx<ExampleModel?>(null);
+  
+  ExampleController({ExampleService? service})
+      : _service = service ?? ServiceLocator.exampleService;
+  
+  Future<void> loadData() async {
+    // Implementation
+  }
+}
+```
+
+### Navigation
+- Use `go_router` for navigation, not GetX navigation
+- Define routes in `lib/core/routes/app_routes.dart`
+- Use `context.go()` or `context.push()` for navigation
+- Never use `Get.to()` or `Get.off()` - use go_router instead
+
+## Code Organization
+
+### File Structure
+```
+lib/
+├── core/                    # Shared utilities and infrastructure
+│   ├── constants/          # App-wide constants (colors, strings, sizes)
+│   ├── controllers/        # Global controllers (e.g., UserController)
+│   ├── di/                 # Dependency injection (ServiceLocator)
+│   ├── notifiers/          # State notifiers (e.g., AuthStateNotifier)
+│   ├── routes/             # Navigation configuration
+│   ├── services/           # Business logic services
+│   └── theme/              # App theming
+├── data/                   # Data layer
+│   └── repositories/       # Repository implementations
+├── domain/                 # Domain layer
+│   ├── models/            # Domain models
+│   └── repositories/      # Repository interfaces
+└── presentation/           # Presentation layer
+    ├── controllers/       # Screen-specific controllers
+    ├── screens/          # Screen widgets
+    └── widgets/          # Reusable widgets
+```
+
+### Naming Conventions
+- **Files**: Use snake_case (e.g., `user_controller.dart`, `auth_service.dart`)
+- **Classes**: Use PascalCase (e.g., `UserController`, `AuthService`)
+- **Variables/Methods**: Use camelCase (e.g., `currentUser`, `loadUserData()`)
+- **Constants**: Use camelCase for constants in classes (e.g., `AppColors.blackColor`)
+- **Private members**: Prefix with underscore (e.g., `_userService`, `_loadData()`)
+- **Repository interfaces**: No suffix (e.g., `AuthRepository`)
+- **Repository implementations**: Suffix with `Impl` (e.g., `AuthRepositoryImpl`)
+
+## Dependency Injection
+
+### Service Locator Pattern
+- Use `ServiceLocator` for dependency injection
+- Initialize all dependencies in `ServiceLocator.init()` at app startup
+- Services depend on repositories, controllers depend on services
+- Always inject dependencies through constructors, never create instances directly
+- Use optional parameters with defaults to ServiceLocator for testability
+
+### Dependency Chain
+```
+Screen → Controller → Service → Repository → Data Source
+```
+
+## Repository Pattern
+
+### Domain Layer (Interfaces)
+- Define abstract repository interfaces in `lib/domain/repositories/`
+- Include comprehensive documentation comments
+- Methods should return `Future<T>` for async operations
+- Throw `Exception` with descriptive messages on failure
+
+### Data Layer (Implementations)
+- Implement interfaces in `lib/data/repositories/`
+- Use dependency injection for Firebase/API clients
+- Handle exceptions and convert to domain exceptions
+- Include private helper methods for data transformation
+
+### Example Pattern
+```dart
+// Domain
+abstract class ExampleRepository {
+  Future<ExampleModel> getData(String id);
+}
+
+// Data
+class ExampleRepositoryImpl implements ExampleRepository {
+  final FirebaseFirestore _firestore;
+  
+  ExampleRepositoryImpl({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+  
+  @override
+  Future<ExampleModel> getData(String id) async {
+    // Implementation
+  }
+}
+```
+
+## Service Layer
+
+### Purpose
+- Services act as use cases between presentation and domain layers
+- Services contain business logic and validation
+- Services depend on repositories, not data sources directly
+- Controllers call services, not repositories directly
+
+### Service Pattern
+```dart
+class ExampleService {
+  final ExampleRepository _repository;
+  
+  ExampleService(this._repository);
+  
+  Future<ExampleModel> getData(String id) async {
+    // Validation
+    if (id.isEmpty) {
+      throw Exception('ID cannot be empty');
+    }
+    // Business logic
+    return await _repository.getData(id);
+  }
+}
+```
+
+## Presentation Layer
+
+### Screens
+- Screens should be `StatelessWidget` when possible
+- Initialize controllers using `Get.put()` or `Get.find()`
+- Use `Obx()` or `GetBuilder()` for reactive UI updates
+- Keep screens focused on UI composition, delegate logic to controllers
+- Always use `const` constructors when possible
+
+### Controllers
+- Extend `GetxController`
+- Use `Rx<T>` for observable state
+- Inject services through constructor
+- Keep controllers thin - delegate to services
+- Handle errors appropriately and show user-friendly messages
+
+### Widgets
+- Create reusable widgets in `lib/presentation/widgets/`
+- Use `const` constructors when possible
+- Accept callbacks for user interactions
+- Follow Material Design guidelines
+- Use constants from `AppColors`, `AppConstants`, `AppStrings`
+
+## Error Handling
+
+### Exception Handling
+- Always use try-catch blocks for async operations
+- Convert technical exceptions to user-friendly messages
+- Log errors using `debugPrint()` for debugging
+- Never expose internal error details to users
+- Throw `Exception` with descriptive messages
+
+### Error Handling Pattern
+```dart
+try {
+  // Operation
+} on SpecificException catch (e) {
+  throw Exception('User-friendly message');
+} catch (e) {
+  throw Exception('Operation failed: ${e.toString()}');
+}
+```
+
+## Constants Management
+
+### Organization
+- **AppColors**: All color constants
+- **AppConstants**: Sizes, padding, dimensions
+- **AppStrings**: All user-facing strings
+
+### Usage
+- Always use constants instead of magic numbers/strings
+- Never hardcode colors, sizes, or strings in widgets
+- Import constants from `core/constants/`
+
+## Documentation
+
+### Comments
+- Use `///` for documentation comments
+- Document all public classes, methods, and properties
+- Include parameter descriptions and return value descriptions
+- Document complex logic and business rules
+- Keep comments concise and meaningful
+
+### Example Documentation
+```dart
+/// Service layer for authentication operations
+/// Acts as a use case layer between presentation and domain
+class AuthService {
+  /// Signs up a new user
+  /// [phoneNumber] - User's phone number
+  /// [password] - User's password
+  /// Returns user ID on success
+  /// Throws [Exception] on failure
+  Future<String> signUp({
+    required String phoneNumber,
+    required String password,
+  }) async {
+    // Implementation
+  }
+}
+```
+
+## Code Quality
+
+### Best Practices
+- Use `const` constructors whenever possible
+- Prefer `final` over `var`
+- Use null safety features (`?`, `!`, `??`)
+- Use named parameters for constructors with multiple parameters
+- Use `required` keyword for non-nullable required parameters
+- Extract magic numbers/strings to constants
+- Keep methods small and focused (single responsibility)
+- Avoid deep nesting (max 3-4 levels)
+
+### Widget Best Practices
+- Prefer composition over inheritance
+- Extract complex widgets into separate files
+- Use `const` widgets to improve performance
+- Avoid rebuilding entire widget trees unnecessarily
+- Use `Obx()` only around widgets that need to react to changes
+
+### Async/Await
+- Always use `async/await` instead of `.then()`
+- Handle errors with try-catch
+- Use `Future<void>` for fire-and-forget operations
+- Don't forget to await async operations
+
+## Testing Considerations
+
+### Testability
+- All dependencies should be injectable
+- Use interfaces for repositories (enables mocking)
+- Services should be testable without UI
+- Controllers should be testable with mocked services
+
+## Firebase Integration
+
+### Firebase Usage
+- Use Firebase Auth for authentication
+- Use Cloud Firestore for data storage
+- Initialize Firebase in `main.dart` before app start
+- Handle Firebase exceptions appropriately
+- Never expose Firebase implementation details to domain layer
+
+## Code Generation
+
+### When to Generate
+- Use code generation for repetitive code
+- Follow Flutter conventions for generated files
+- Never edit generated files directly
+
+## Git Practices
+
+### Commit Messages
+- Use clear, descriptive commit messages
+- Follow conventional commit format when possible
+- Reference issues/PRs when applicable
+
+## Performance
+
+### Optimization
+- Use `const` constructors to reduce rebuilds
+- Avoid unnecessary state updates
+- Use `ListView.builder` for long lists
+- Optimize images and assets
+- Profile before optimizing
+
+## Security
+
+### Best Practices
+- Never commit API keys or secrets
+- Use environment variables for sensitive data
+- Validate all user inputs
+- Sanitize data before storing in Firestore
+- Use Firebase security rules
+
+## Additional Guidelines
+
+### Imports
+- Group imports: Flutter packages, third-party packages, project imports
+- Use relative imports for project files
+- Sort imports alphabetically within groups
+
+### Formatting
+- Follow Dart formatting conventions
+- Use `dart format` before committing
+- Maximum line length: 80-100 characters (be reasonable)
+
+### Type Safety
+- Always specify types explicitly for public APIs
+- Use type inference for local variables when clear
+- Avoid `dynamic` type unless absolutely necessary
+
+## When Adding New Features
+
+1. **Domain Layer First**: Define models and repository interfaces
+2. **Data Layer**: Implement repositories
+3. **Service Layer**: Create services with business logic
+4. **Presentation Layer**: Create controllers, screens, and widgets
+5. **Dependency Injection**: Register in ServiceLocator
+6. **Routes**: Add routes if needed
+7. **Constants**: Add constants if needed
+
+## Anti-Patterns to Avoid
+
+- ❌ Don't access repositories directly from controllers
+- ❌ Don't use GetX navigation (use go_router)
+- ❌ Don't create instances directly (use DI)
+- ❌ Don't put business logic in widgets
+- ❌ Don't hardcode strings/colors/numbers
+- ❌ Don't ignore errors
+- ❌ Don't use `print()` - use `debugPrint()`
+- ❌ Don't create deep widget trees - extract widgets
+- ❌ Don't mix concerns (UI logic with business logic)
+- ❌ Don't skip documentation for public APIs
+
+## Code Review Checklist
+
+- [ ] Follows Clean Architecture layers
+- [ ] Uses dependency injection
+- [ ] Has proper error handling
+- [ ] Uses constants instead of magic values
+- [ ] Has documentation comments
+- [ ] Follows naming conventions
+- [ ] Uses const constructors where possible
+- [ ] No direct repository access from controllers
+- [ ] Uses go_router for navigation
+- [ ] Properly handles async operations
+
