@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_routes.dart';
 import 'core/di/service_locator.dart';
+import 'core/notifiers/auth_state_notifier.dart';
 
 /// Main entry point of the application
 /// Initializes Firebase, GetX for state management and go_router for navigation
@@ -61,8 +63,50 @@ Future<void> main() async {
 
 /// Root widget of the application
 /// Configures MaterialApp with theme and go_router
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AuthStateNotifier _authStateNotifier;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create auth state notifier instance
+    _authStateNotifier = AuthStateNotifier();
+    
+    // Create router with auth state notifier
+    _router = AppRoutes.getRouter(authStateNotifier: _authStateNotifier);
+    
+    // Load user data if already authenticated (app restart scenario)
+    _loadUserDataIfAuthenticated();
+  }
+
+  /// Loads user data if user is already authenticated
+  /// This handles the case when app restarts and user is still logged in
+  Future<void> _loadUserDataIfAuthenticated() async {
+    if (_authStateNotifier.isAuthenticated) {
+      final userId = _authStateNotifier.currentUserId;
+      if (userId != null) {
+        try {
+          await ServiceLocator.userController.loadUserData(userId);
+        } catch (e) {
+          debugPrint('Failed to load user data on app start: $e');
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _authStateNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +114,7 @@ class MyApp extends StatelessWidget {
       title: 'Pennywise',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routerConfig: AppRoutes.getRouter(),
+      routerConfig: _router,
     );
   }
 }

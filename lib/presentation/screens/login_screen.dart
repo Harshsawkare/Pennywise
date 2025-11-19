@@ -25,9 +25,11 @@ class LoginScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.horizontalPadding,
-          ) + EdgeInsets.only(top: 100),
+          padding:
+              const EdgeInsets.symmetric(
+                horizontal: AppConstants.horizontalPadding,
+              ) +
+              EdgeInsets.only(top: 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -66,7 +68,8 @@ class LoginScreen extends StatelessWidget {
                   focusNode: controller.passwordFocusNode,
                   showPasswordToggle: true,
                   isPasswordVisible: controller.isPasswordVisible.value,
-                  onTogglePasswordVisibility: controller.togglePasswordVisibility,
+                  onTogglePasswordVisibility:
+                      controller.togglePasswordVisibility,
                   onChanged: (_) => controller.validateForm(),
                   onSubmitted: (_) {
                     controller.passwordFocusNode.unfocus();
@@ -82,7 +85,9 @@ class LoginScreen extends StatelessWidget {
                 () => CustomButton(
                   text: AppStrings.proceedButton,
                   isPrimary: true,
-                  isEnabled: controller.isFormValid.value && !controller.isLoading.value,
+                  isEnabled:
+                      controller.isFormValid.value &&
+                      !controller.isLoading.value,
                   onPressed: controller.proceed,
                 ),
               ),
@@ -116,4 +121,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-

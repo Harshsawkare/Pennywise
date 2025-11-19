@@ -65,18 +65,18 @@ class CustomTextField extends StatelessWidget {
         obscureText: isPassword && !isPasswordVisible,
         style: const TextStyle(
           color: AppColors.blackColor,
-          fontSize: 16,
+          fontSize: 14,
         ),
         decoration: InputDecoration(
           hintText: placeholder,
           hintStyle: const TextStyle(
             color: AppColors.lightGreyColor,
-            fontSize: 16,
+            fontSize: 14,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 16,
+            vertical: 10,
           ),
           suffixIcon: showPasswordToggle
               ? IconButton(

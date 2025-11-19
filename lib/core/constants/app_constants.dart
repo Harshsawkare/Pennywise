@@ -19,9 +19,9 @@ class AppConstants {
   static const double largeVerticalSpacing = 32.0;
 
   /// Button height for consistent sizing
-  static const double buttonHeight = 56.0;
+  static const double buttonHeight = 46.0;
 
   /// Input field height for consistent sizing
-  static const double inputFieldHeight = 56.0;
+  static const double inputFieldHeight = 46.0;
 }
 

@@ -28,19 +28,50 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Title section
+              // Title section with save icon
               Padding(
                 padding: const EdgeInsets.only(
                   top: AppConstants.largeVerticalSpacing,
                   bottom: AppConstants.largeVerticalSpacing,
                 ),
-                child: Text(
-                  AppStrings.settingsTab,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.blackColor,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      AppStrings.settingsTab,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.blackColor,
+                      ),
+                    ),
+                    Obx(
+                      () => controller.hasUnsavedChanges
+                          ? GestureDetector(
+                              onTap: controller.isSaving.value
+                                  ? null
+                                  : controller.saveSettings,
+                              child: controller.isSaving.value
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.lightGreyColor,
+                                        ),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.save_rounded,
+                                      color: AppColors.lightGreyColor,
+                                      size: 24,
+                                    ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
 
@@ -58,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                   title: AppStrings.currency,
                   badge: controller.selectedCurrency.value,
                   onTap: controller.navigateToCurrency,
-                  showArrow: true,
+                  showArrow: false,
                 ),
               ),
 
@@ -67,6 +98,7 @@ class SettingsScreen extends StatelessWidget {
               Obx(
                 () => SettingsItem(
                   title: AppStrings.use24hrClock,
+                  subtitle: AppStrings.use24hrClockSubtitle,
                   showToggle: true,
                   toggleValue: controller.is24hrClock.value,
                   onToggleChanged: controller.toggle24hrClock,

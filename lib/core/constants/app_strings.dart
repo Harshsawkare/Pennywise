@@ -31,10 +31,14 @@ class AppStrings {
   static const String categories = 'Categories';
   static const String currency = 'Currency';
   static const String use24hrClock = 'Use 24hr clock';
+  static const String use24hrClockSubtitle = 'Show 14:30 instead of 2:30 PM';
   static const String eodReminder = 'EOD Reminder';
   static const String eodReminderSubtitle = 'Receive a notification everyday at 09:00 PM';
   static const String eodReminder24Subtitle = 'Receive a notification everyday at 2100 hrs.';
   static const String logout = 'Logout.';
   static const String defaultCurrency = 'INR';
+
+  // Sheets Screen
+  static const String addSheet = 'Add Sheet.';
 }
 

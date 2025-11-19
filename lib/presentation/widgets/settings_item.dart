@@ -48,7 +48,7 @@ class SettingsItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16,
+          vertical: 10,
         ),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,

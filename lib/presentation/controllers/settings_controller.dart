@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pennywise/core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +16,17 @@ class SettingsController extends GetxController {
   final RxString selectedCurrency = 'INR'.obs;
   final RxList<String> currencies = <String>[].obs;
   final RxBool isLoadingCurrencies = false.obs;
+  final RxBool isSaving = false.obs;
+
+  // Original values to track changes
+  String _originalCurrency = 'INR';
+  bool _originalIs24hrClock = false;
+  bool _originalEnableEODReminder = true;
+
+  // Computed observable for unsaved changes
+  bool get hasUnsavedChanges => selectedCurrency.value != _originalCurrency ||
+      is24hrClock.value != _originalIs24hrClock ||
+      enableEODReminder.value != _originalEnableEODReminder;
 
   // BuildContext for navigation
   BuildContext? _context;
@@ -37,13 +49,19 @@ class SettingsController extends GetxController {
   void loadUserSettings() {
     final userController = ServiceLocator.userController;
     final currentUser = userController.currentUser.value;
-    
+
     if (currentUser != null) {
       selectedCurrency.value = currentUser.selectedCurrency;
       is24hrClock.value = currentUser.is24h;
       enableEODReminder.value = currentUser.enableEODReminder;
+      
+      // Store original values to track changes
+      _originalCurrency = currentUser.selectedCurrency;
+      _originalIs24hrClock = currentUser.is24h;
+      _originalEnableEODReminder = currentUser.enableEODReminder;
     }
   }
+
 
   /// Loads currencies from Firestore
   Future<void> loadCurrencies() async {
@@ -70,13 +88,76 @@ class SettingsController extends GetxController {
   /// Toggles 24-hour clock setting
   void toggle24hrClock(bool value) {
     is24hrClock.value = value;
-    // TODO: Save to Firestore or local storage
   }
 
   /// Toggles EOD reminder setting
   void toggleEODReminder(bool value) {
     enableEODReminder.value = value;
-    // TODO: Save to Firestore or local storage
+  }
+
+  /// Saves user settings to Firestore
+  Future<void> saveSettings() async {
+    if (_context == null) return;
+
+    final userController = ServiceLocator.userController;
+    final currentUser = userController.currentUser.value;
+
+    if (currentUser == null) {
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          const SnackBar(
+            content: Text('No user data found. Please log in again.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    isSaving.value = true;
+
+    try {
+      // Create updated user model with new settings
+      final updatedUser = currentUser.copyWith(
+        selectedCurrency: selectedCurrency.value,
+        is24h: is24hrClock.value,
+        enableEODReminder: enableEODReminder.value,
+        updateOn: DateTime.now(),
+      );
+
+      // Update user data in Firestore
+      await userController.updateUserData(updatedUser);
+
+      // Update original values after successful save
+      _originalCurrency = selectedCurrency.value;
+      _originalIs24hrClock = is24hrClock.value;
+      _originalEnableEODReminder = enableEODReminder.value;
+
+      // Show success message
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          const SnackBar(
+            content: Text('Settings saved successfully'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Show error message
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save settings: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      isSaving.value = false;
+    }
   }
 
   /// Navigates to categories screen
@@ -117,20 +198,18 @@ class SettingsController extends GetxController {
       context: _context!,
       builder: (BuildContext context) {
         int tempSelectedIndex = selectedIndex;
-        
+
         return Container(
           height: 216,
           padding: const EdgeInsets.only(top: 6.0),
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: CupertinoColors.systemBackground,
-            border: Border(
-              top: BorderSide(
-                color: CupertinoColors.separator,
-                width: 0.0,
-              ),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppConstants.borderRadius),
+              topRight: Radius.circular(AppConstants.borderRadius),
             ),
           ),
           child: SafeArea(
@@ -159,11 +238,13 @@ class SettingsController extends GetxController {
                           ),
                         ),
                       ),
-                      const Text(
-                        'Select Currency',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      const Material(
+                        child: Text(
+                          'Select Currency',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       CupertinoButton(
@@ -203,9 +284,7 @@ class SettingsController extends GetxController {
                         return Center(
                           child: Text(
                             currency,
-                            style: const TextStyle(
-                              fontSize: 20,
-                            ),
+                            style: const TextStyle(fontSize: 20),
                           ),
                         );
                       }).toList(),
@@ -254,4 +333,3 @@ class SettingsController extends GetxController {
     super.onClose();
   }
 }
-
