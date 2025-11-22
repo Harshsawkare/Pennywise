@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/config_repository.dart';
+import '../../data/repositories/config_repository_impl.dart';
 
 /// Data layer implementation of AuthRepository
 /// Handles phone number + password authentication using Firebase Auth
@@ -8,15 +11,19 @@ import '../../domain/repositories/auth_repository.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final ConfigRepository _configRepository;
 
   /// Constructor with dependency injection
   /// [firebaseAuth] - Firebase Auth instance (defaults to FirebaseAuth.instance)
   /// [firestore] - Firebase Firestore instance (defaults to FirebaseFirestore.instance)
+  /// [configRepository] - Config repository instance (defaults to ConfigRepositoryImpl)
   AuthRepositoryImpl({
     FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
+    ConfigRepository? configRepository,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _configRepository = configRepository ?? ConfigRepositoryImpl();
 
   @override
   Future<String> signUpWithPhoneAndPassword({
@@ -153,6 +160,16 @@ class AuthRepositoryImpl implements AuthRepository {
       final now = DateTime.now();
       final userRef = _firestore.collection('users').doc(uid);
 
+      // Fetch default categories from Firestore
+      List<Map<String, dynamic>> defaultCategories = [];
+      try {
+        final categories = await _configRepository.getDefaultCategories();
+        defaultCategories = categories.map((e) => e.toMap()).toList();
+      } catch (e) {
+        // Log error but don't fail user creation if categories can't be fetched
+        debugPrint('Failed to fetch default categories: $e');
+      }
+
       // Create new user document
       await userRef.set({
         'uid': uid,
@@ -162,7 +179,8 @@ class AuthRepositoryImpl implements AuthRepository {
         'isActive': true,
         'selectedCurrency': 'INR',
         'is24h': true,
-        'enableEODReminder': true,
+        'enableEODReminder': false,
+        'categories': defaultCategories,
       });
     } catch (e) {
       throw Exception('Failed to save user data: ${e.toString()}');

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../core/di/service_locator.dart';
 
 /// Login controller managing the state and business logic for the login screen
@@ -85,11 +86,11 @@ class LoginController extends GetxController {
       
       // Verify user data was loaded successfully
       if (ServiceLocator.userController.currentUser.value == null) {
-        throw Exception('Failed to load user data. Please try again.');
+        throw Exception(AppStrings.failedToLoadUserData);
       }
 
       // On success, show success message and navigate to home
-      _showSuccessMessage('Login successful');
+      _showSuccessMessage(AppStrings.loginSuccessful);
       
       // Navigate to home screen after successful login
       _context!.go(AppRoutes.home);
@@ -140,7 +141,7 @@ class LoginController extends GetxController {
     if (_context != null) {
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text('Please fill all fields'),
+          content: Text(AppStrings.pleaseFillAllFields),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),

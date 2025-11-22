@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../domain/models/user_model.dart';
+import '../../domain/models/category_model.dart';
 import '../services/user_service.dart';
 import '../di/service_locator.dart';
 
@@ -60,7 +61,83 @@ class UserController extends GetxController {
   /// Gets the current user's EOD reminder setting
   /// Returns default true if no user is loaded
   bool getEnableEODReminder() {
-    return currentUser.value?.enableEODReminder ?? true;
+    return currentUser.value?.enableEODReminder ?? false;
+  }
+
+  /// Gets the current user's categories list
+  /// Returns empty list if no user is loaded or no categories exist
+  List<CategoryModel> getCategories() {
+    return currentUser.value?.categories ?? [];
+  }
+
+  /// Updates categories list in the controller and Firestore
+  /// [categories] - Updated list of CategoryModel
+  /// Throws [Exception] on failure
+  Future<void> updateCategories(List<CategoryModel> categories) async {
+    try {
+      final user = currentUser.value;
+      if (user == null) {
+        throw Exception('No user logged in');
+      }
+      
+      final updatedUser = user.copyWith(
+        categories: categories,
+        updateOn: DateTime.now(),
+      );
+      
+      await updateUserData(updatedUser);
+    } catch (e) {
+      throw Exception('Failed to update categories: ${e.toString()}');
+    }
+  }
+
+  /// Adds a new category to the user's categories list
+  /// [category] - CategoryModel to add
+  /// Throws [Exception] on failure
+  Future<void> addCategory(CategoryModel category) async {
+    try {
+      final categories = getCategories();
+      
+      // Check if category with same name already exists
+      if (categories.any((c) => c.name == category.name)) {
+        throw Exception('Category with this name already exists');
+      }
+      
+      final updatedCategories = [...categories, category];
+      await updateCategories(updatedCategories);
+    } catch (e) {
+      throw Exception('Failed to add category: ${e.toString()}');
+    }
+  }
+
+  /// Updates an existing category in the user's categories list
+  /// [oldCategory] - CategoryModel to replace
+  /// [newCategory] - Updated CategoryModel
+  /// Throws [Exception] on failure
+  Future<void> updateCategory(
+    CategoryModel oldCategory,
+    CategoryModel newCategory,
+  ) async {
+    try {
+      final categories = getCategories();
+      final index = categories.indexWhere((c) => c.name == oldCategory.name);
+      
+      if (index == -1) {
+        throw Exception('Category not found');
+      }
+      
+      // Check if another category with the new name already exists
+      if (oldCategory.name != newCategory.name &&
+          categories.any((c) => c.name == newCategory.name)) {
+        throw Exception('Category with this name already exists');
+      }
+      
+      final updatedCategories = List<CategoryModel>.from(categories);
+      updatedCategories[index] = newCategory;
+      await updateCategories(updatedCategories);
+    } catch (e) {
+      throw Exception('Failed to update category: ${e.toString()}');
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'category_model.dart';
 
 /// User model representing user data from Firestore
 /// Follows clean architecture by keeping domain layer model simple
@@ -27,6 +28,9 @@ class UserModel {
   /// Whether EOD reminder is enabled
   final bool enableEODReminder;
 
+  /// User's categories list
+  final List<CategoryModel> categories;
+
   /// Constructor
   const UserModel({
     required this.uid,
@@ -37,11 +41,26 @@ class UserModel {
     required this.selectedCurrency,
     required this.is24h,
     required this.enableEODReminder,
+    required this.categories,
   });
 
   /// Creates UserModel from Firestore document snapshot
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    
+    final categoriesData = data['categories'];
+    List<CategoryModel> categoriesList = [];
+    if (categoriesData != null && categoriesData is List) {
+      categoriesList = categoriesData
+          .map((e) {
+            if (e is Map<String, dynamic>) {
+              return CategoryModel.fromMap(e);
+            }
+            return null;
+          })
+          .whereType<CategoryModel>()
+          .toList();
+    }
     
     return UserModel(
       uid: data['uid'] as String? ?? doc.id,
@@ -51,12 +70,27 @@ class UserModel {
       isActive: data['isActive'] as bool? ?? true,
       selectedCurrency: data['selectedCurrency'] as String? ?? 'INR',
       is24h: data['is24h'] as bool? ?? false,
-      enableEODReminder: data['enableEODReminder'] as bool? ?? true,
+      enableEODReminder: data['enableEODReminder'] as bool? ?? false,
+      categories: categoriesList,
     );
   }
 
   /// Creates UserModel from Firestore document data map
   factory UserModel.fromMap(Map<String, dynamic> data, String uid) {
+    final categoriesData = data['categories'];
+    List<CategoryModel> categoriesList = [];
+    if (categoriesData != null && categoriesData is List) {
+      categoriesList = categoriesData
+          .map((e) {
+            if (e is Map<String, dynamic>) {
+              return CategoryModel.fromMap(e);
+            }
+            return null;
+          })
+          .whereType<CategoryModel>()
+          .toList();
+    }
+    
     return UserModel(
       uid: uid,
       phoneNo: data['phoneNo'] as String? ?? '',
@@ -65,7 +99,8 @@ class UserModel {
       isActive: data['isActive'] as bool? ?? true,
       selectedCurrency: data['selectedCurrency'] as String? ?? 'INR',
       is24h: data['is24h'] as bool? ?? false,
-      enableEODReminder: data['enableEODReminder'] as bool? ?? true,
+      enableEODReminder: data['enableEODReminder'] as bool? ?? false,
+      categories: categoriesList,
     );
   }
 
@@ -80,6 +115,7 @@ class UserModel {
       'selectedCurrency': selectedCurrency,
       'is24h': is24h,
       'enableEODReminder': enableEODReminder,
+      'categories': categories.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -93,6 +129,7 @@ class UserModel {
     String? selectedCurrency,
     bool? is24h,
     bool? enableEODReminder,
+    List<CategoryModel>? categories,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -103,6 +140,7 @@ class UserModel {
       selectedCurrency: selectedCurrency ?? this.selectedCurrency,
       is24h: is24h ?? this.is24h,
       enableEODReminder: enableEODReminder ?? this.enableEODReminder,
+      categories: categories ?? this.categories,
     );
   }
 }

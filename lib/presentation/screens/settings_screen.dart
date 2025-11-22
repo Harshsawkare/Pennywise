@@ -82,16 +82,16 @@ class SettingsScreen extends StatelessWidget {
                 showArrow: true,
               ),
 
-              // const SizedBox(height: AppConstants.verticalSpacing),
-              //
-              // Obx(
-              //   () => SettingsItem(
-              //     title: AppStrings.currency,
-              //     badge: controller.selectedCurrency.value,
-              //     onTap: controller.navigateToCurrency,
-              //     showArrow: false,
-              //   ),
-              // ),
+              const SizedBox(height: AppConstants.verticalSpacing),
+
+              Obx(
+                () => SettingsItem(
+                  title: AppStrings.currency,
+                  badge: controller.selectedCurrency.value,
+                  onTap: controller.navigateToCurrency,
+                  showArrow: false,
+                ),
+              ),
 
               const SizedBox(height: AppConstants.verticalSpacing),
 
@@ -106,18 +106,19 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: AppConstants.verticalSpacing),
-
-              Obx(
-                () => SettingsItem(
-                  title: AppStrings.eodReminder,
-                  subtitle: AppStrings.eodReminderSubtitle,
-                  showToggle: true,
-                  toggleValue: controller.enableEODReminder.value,
-                  onToggleChanged: controller.toggleEODReminder,
-                  showArrow: false,
-                ),
-              ),
+              /// Enable EOD Reminder in P2
+              // const SizedBox(height: AppConstants.verticalSpacing),
+              //
+              // Obx(
+              //   () => SettingsItem(
+              //     title: AppStrings.eodReminder,
+              //     subtitle: AppStrings.eodReminderSubtitle,
+              //     showToggle: true,
+              //     toggleValue: controller.enableEODReminder.value,
+              //     onToggleChanged: controller.toggleEODReminder,
+              //     showArrow: false,
+              //   ),
+              // ),
 
               // Spacer to push logout button to bottom
               const Spacer(),

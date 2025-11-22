@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/di/service_locator.dart';
+import '../../domain/models/category_model.dart';
 
 /// Add Entry controller managing the state and business logic for the add entry screen
 /// Follows GetX state management pattern and SOLID principles
@@ -31,6 +32,12 @@ class AddEntryController extends GetxController {
   /// Selected category
   final RxString selectedCategory = AppStrings.foodAndDrink.obs;
 
+  /// Gets the list of categories from the current user
+  /// Returns empty list if user is not loaded or has no categories
+  List<CategoryModel> getCategories() {
+    return ServiceLocator.userController.getCategories();
+  }
+
   /// Sets the build context for navigation
   void setContext(BuildContext context) {
     _context = context;
@@ -39,6 +46,17 @@ class AddEntryController extends GetxController {
   /// Sets the sheet ID for this entry
   void setSheetId(String? id) {
     sheetId = id;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Listen to user changes to refresh categories
+    final userController = ServiceLocator.userController;
+    ever(userController.currentUser, (_) {
+      // Force rebuild when categories are updated
+      update();
+    });
   }
 
   @override
@@ -86,18 +104,18 @@ class AddEntryController extends GetxController {
   /// Formats date for display
   String getFormattedDate() {
     final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
+      AppStrings.monthJan,
+      AppStrings.monthFeb,
+      AppStrings.monthMar,
+      AppStrings.monthApr,
+      AppStrings.monthMay,
+      AppStrings.monthJun,
+      AppStrings.monthJul,
+      AppStrings.monthAug,
+      AppStrings.monthSep,
+      AppStrings.monthOct,
+      AppStrings.monthNov,
+      AppStrings.monthDec,
     ];
     final date = selectedDate.value;
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
@@ -108,7 +126,7 @@ class AddEntryController extends GetxController {
     final time = selectedTime.value;
     final hour = time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    final period = time.period == DayPeriod.am ? AppStrings.am : AppStrings.pm;
     return '$hour:$minute $period';
   }
 
@@ -120,7 +138,7 @@ class AddEntryController extends GetxController {
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid amount'),
+          content: Text(AppStrings.pleaseEnterValidAmount),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -131,7 +149,7 @@ class AddEntryController extends GetxController {
     if (sheetId == null || sheetId!.isEmpty) {
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text('Sheet ID is missing'),
+          content: Text(AppStrings.sheetIdMissing),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -144,7 +162,7 @@ class AddEntryController extends GetxController {
       if (userId == null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           const SnackBar(
-            content: Text('User not authenticated'),
+            content: Text(AppStrings.userNotAuthenticated),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -174,7 +192,7 @@ class AddEntryController extends GetxController {
 
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text('Entry added successfully'),
+          content: Text(AppStrings.entryAddedSuccessfully),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
@@ -188,7 +206,7 @@ class AddEntryController extends GetxController {
       debugPrint('Failed to create entry: $e');
       ScaffoldMessenger.of(_context!).showSnackBar(
         SnackBar(
-          content: Text('Failed to add entry: ${e.toString()}'),
+          content: Text('${AppStrings.failedToAddEntry}: ${e.toString()}'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../core/constants/app_constants.dart';
 import '../controllers/add_entry_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
+import '../../domain/models/category_model.dart';
 
 /// Add Entry screen for creating new expense or income entries
 class AddEntryScreen extends StatelessWidget {
@@ -105,12 +107,21 @@ class AddEntryScreen extends StatelessWidget {
 
             // Category picker
             Obx(
-              () => _CategoryPicker(
-                selectedCategory: controller.selectedCategory.value,
-                onCategoryChanged: (category) {
-                  controller.selectedCategory.value = category;
-                },
-              ),
+              () {
+                final categories = controller.getCategories();
+                // Set default category if not set and categories are available
+                if (categories.isNotEmpty && 
+                    !categories.any((c) => c.name == controller.selectedCategory.value)) {
+                  controller.selectedCategory.value = categories.first.name;
+                }
+                return _CategoryPicker(
+                  selectedCategory: controller.selectedCategory.value,
+                  categories: categories,
+                  onCategoryChanged: (categoryName) {
+                    controller.selectedCategory.value = categoryName;
+                  },
+                );
+              },
             ),
 
             // Spacer to push button to bottom
@@ -264,58 +275,133 @@ class _DateTimePickerField extends StatelessWidget {
 /// Category picker widget
 class _CategoryPicker extends StatelessWidget {
   final String selectedCategory;
+  final List<CategoryModel> categories;
   final Function(String) onCategoryChanged;
 
   const _CategoryPicker({
     required this.selectedCategory,
+    required this.categories,
     required this.onCategoryChanged,
   });
 
+  /// Converts hex color string to Color
+  Color _hexToColor(String hexCode) {
+    try {
+      // Remove # if present
+      final hex = hexCode.replaceAll('#', '');
+      // Handle 6-digit hex
+      if (hex.length == 6) {
+        return Color(int.parse('FF$hex', radix: 16));
+      }
+      // Handle 8-digit hex (with alpha)
+      if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+      // Default to black if invalid
+      return AppColors.blackColor;
+    } catch (e) {
+      return AppColors.blackColor;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      AppStrings.foodAndDrink,
-      'Fun and Entertainment',
-      'Budget',
-      'Transport',
-      'Shopping',
-      'Bills',
-    ];
-
     return GestureDetector(
       onTap: () {
-        showModalBottomSheet(
+        showCupertinoModalPopup<void>(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
           builder: (context) {
             return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 24,
+              height: 400,
+              padding: const EdgeInsets.only(top: 6.0),
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Select Category',
-                    style: TextStyle(color: AppColors.mediumGreyColor, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  ...categories.map((category) {
-                    return ListTile(
-                      title: Text(category),
-                      trailing: selectedCategory == category
-                          ? const Icon(Icons.check, color: Colors.blue)
-                          : null,
-                      onTap: () {
-                        onCategoryChanged(category);
-                        Navigator.pop(context);
-                      },
-                    );
-                  }),
-                ],
+              decoration: const BoxDecoration(
+                color: CupertinoColors.systemBackground,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    // Header with title
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: CupertinoColors.separator,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Material(
+                            child: Text(
+                              AppStrings.selectCategory,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.label,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Category list
+                    Expanded(
+                      child: categories.isEmpty
+                          ? Center(
+                              child: Text(
+                                AppStrings.noCategoriesAvailable,
+                                style: TextStyle(
+                                  color: CupertinoColors.placeholderText,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                final category = categories[index];
+                                final isSelected = selectedCategory == category.name;
+                                return CupertinoListTile(
+                                  leading: Container(
+                                    width: 4,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: _hexToColor(category.hexCode),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(12.0),
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(category.name),
+                                  trailing: isSelected
+                                      ? const Icon(
+                                          CupertinoIcons.check_mark,
+                                          color: CupertinoColors.activeBlue,
+                                        )
+                                      : null,
+                                  onTap: () {
+                                    onCategoryChanged(category.name);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -7,7 +7,9 @@ import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/sheet_model.dart';
 import '../../domain/models/entry_model.dart';
+import '../../domain/models/category_model.dart';
 import '../controllers/sheet_entries_controller.dart';
+import '../../core/di/service_locator.dart';
 import '../widgets/custom_button.dart';
 
 /// Sheet Entries screen - displays all entries for a specific sheet
@@ -35,9 +37,9 @@ class SheetEntriesScreen extends StatelessWidget {
     final yesterday = today.subtract(const Duration(days: 1));
 
     if (dateOnly == today) {
-      return 'Today';
+      return AppStrings.today;
     } else if (dateOnly == yesterday) {
-      return 'Yesterday';
+      return AppStrings.yesterday;
     } else {
       return DateFormat('EEE').format(date);
     }
@@ -73,22 +75,24 @@ class SheetEntriesScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppConstants.horizontalPadding),
-            child: GestureDetector(
-              onTap: controller.showCategoryFilter,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.lightGreyColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: const Text(
-                  AppStrings.allCategories,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.blackColor,
+            child: Obx(
+              () => GestureDetector(
+                onTap: controller.showCategoryFilter,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightGreyColor.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Text(
+                    controller.categoryFilterText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.blackColor,
+                    ),
                   ),
                 ),
               ),
@@ -162,7 +166,7 @@ class SheetEntriesScreen extends StatelessWidget {
                 if (entriesByDate.isEmpty) {
                   return const Center(
                     child: Text(
-                      'No entries yet. Add your first entry!',
+                      AppStrings.noEntriesYet,
                       style: TextStyle(
                         color: AppColors.lightGreyColor,
                         fontSize: 16,
@@ -188,7 +192,6 @@ class SheetEntriesScreen extends StatelessWidget {
                       dailyTotal: dailyTotal,
                       formatCurrency: _formatCurrency,
                       formatCurrencyWithSign: _formatCurrencyWithSign,
-                      getCategoryColor: controller.getCategoryColor,
                     );
                   },
                 );
@@ -219,7 +222,6 @@ class _DateGroup extends StatelessWidget {
   final double dailyTotal;
   final String Function(double) formatCurrency;
   final String Function(double) formatCurrencyWithSign;
-  final Color Function(String) getCategoryColor;
 
   const _DateGroup({
     required this.date,
@@ -228,7 +230,6 @@ class _DateGroup extends StatelessWidget {
     required this.dailyTotal,
     required this.formatCurrency,
     required this.formatCurrencyWithSign,
-    required this.getCategoryColor,
   });
 
   @override
@@ -278,7 +279,6 @@ class _DateGroup extends StatelessWidget {
             entry: entry,
             formatCurrency: formatCurrency,
             formatCurrencyWithSign: formatCurrencyWithSign,
-            getCategoryColor: getCategoryColor,
           ),
         ),
 
@@ -289,15 +289,31 @@ class _DateGroup extends StatelessWidget {
 
   String _formatDateHeader(DateTime date) {
     final day = date.day;
-    String suffix = 'th';
+    String suffix = AppStrings.dateSuffixTh;
     if (day == 1 || day == 21 || day == 31) {
-      suffix = 'st';
+      suffix = AppStrings.dateSuffixSt;
     } else if (day == 2 || day == 22) {
-      suffix = 'nd';
+      suffix = AppStrings.dateSuffixNd;
     } else if (day == 3 || day == 23) {
-      suffix = 'rd';
+      suffix = AppStrings.dateSuffixRd;
     }
     return DateFormat('d\'$suffix\' MMM').format(date);
+  }
+}
+
+/// Helper function to convert hex color string to Color
+Color _hexToColor(String hexCode) {
+  try {
+    final hex = hexCode.replaceAll('#', '');
+    if (hex.length == 6) {
+      return Color(int.parse('FF$hex', radix: 16));
+    }
+    if (hex.length == 8) {
+      return Color(int.parse(hex, radix: 16));
+    }
+    return AppColors.blackColor;
+  } catch (e) {
+    return AppColors.blackColor;
   }
 }
 
@@ -306,18 +322,15 @@ class _EntryCard extends StatelessWidget {
   final EntryModel entry;
   final String Function(double) formatCurrency;
   final String Function(double) formatCurrencyWithSign;
-  final Color Function(String) getCategoryColor;
 
   const _EntryCard({
     required this.entry,
     required this.formatCurrency,
     required this.formatCurrencyWithSign,
-    required this.getCategoryColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final categoryColor = getCategoryColor(entry.category);
     final isIncome = entry.type == 'income';
 
     return Container(
@@ -332,18 +345,31 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Colored vertical line
-          Container(
-            width: 4,
-            height: 60,
-            decoration: BoxDecoration(
-              color: categoryColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                bottomLeft: Radius.circular(12.0),
+          // Colored vertical line - reactive to category updates
+          Obx(() {
+            final userController = ServiceLocator.userController;
+            final currentUser = userController.currentUser.value;
+            final categories = currentUser?.categories ?? [];
+            final categoryModel = categories.firstWhere(
+              (c) => c.name == entry.category,
+              orElse: () => CategoryModel(
+                name: entry.category,
+                hexCode: '#E0E0E0',
               ),
-            ),
-          ),
+            );
+            final color = _hexToColor(categoryModel.hexCode);
+            return Container(
+              width: 4,
+              height: 60,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12.0),
+                  bottomLeft: Radius.circular(12.0),
+                ),
+              ),
+            );
+          }),
           const SizedBox(width: 12),
           // Entry details
           Expanded(

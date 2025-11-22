@@ -5,7 +5,10 @@ import '../../presentation/screens/signup_screen.dart';
 import '../../presentation/screens/main_navigation_screen.dart';
 import '../../presentation/screens/sheet_entries_screen.dart';
 import '../../presentation/screens/add_entry_screen.dart';
+import '../../presentation/screens/categories_screen.dart';
+import '../../presentation/screens/add_edit_category_screen.dart';
 import '../../domain/models/sheet_model.dart';
+import '../../domain/models/category_model.dart';
 import '../notifiers/auth_state_notifier.dart';
 import '../di/service_locator.dart';
 
@@ -21,6 +24,9 @@ class AppRoutes {
   static const String home = '/home';
   static const String sheetEntries = '/sheet/:sheetId';
   static const String addEntry = '/add-entry';
+  static const String categories = '/categories';
+  static const String addCategory = '/add-category';
+  static const String editCategory = '/edit-category';
 
   /// Get the GoRouter configuration
   /// [authStateNotifier] - Optional auth state notifier for listening to auth changes
@@ -106,6 +112,24 @@ class AppRoutes {
               builder: (context, state) {
                 final sheetId = state.uri.queryParameters['sheetId'];
                 return AddEntryScreen(sheetId: sheetId);
+              },
+            ),
+            GoRoute(
+              path: 'categories',
+              name: 'categories',
+              builder: (context, state) => const CategoriesScreen(),
+            ),
+            GoRoute(
+              path: 'add-category',
+              name: 'addCategory',
+              builder: (context, state) => const AddEditCategoryScreen(),
+            ),
+            GoRoute(
+              path: 'edit-category',
+              name: 'editCategory',
+              builder: (context, state) {
+                final category = state.extra as CategoryModel?;
+                return AddEditCategoryScreen(category: category);
               },
             ),
           ],

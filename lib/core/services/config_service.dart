@@ -1,4 +1,5 @@
 import '../../domain/repositories/config_repository.dart';
+import '../../domain/models/category_model.dart';
 
 /// Service layer for configuration operations
 /// Acts as a use case layer between presentation and domain
@@ -15,6 +16,14 @@ class ConfigService {
   /// Throws [Exception] on failure
   Future<List<String>> getCurrencies() async {
     return await _configRepository.getCurrencies();
+  }
+
+  /// Fetches default categories from Firestore
+  /// Queries config.defaultCategories.defaultCategories path
+  /// Returns list of CategoryModel objects
+  /// Throws [Exception] on failure
+  Future<List<CategoryModel>> getDefaultCategories() async {
+    return await _configRepository.getDefaultCategories();
   }
 }
 

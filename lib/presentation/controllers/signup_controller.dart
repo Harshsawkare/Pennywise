@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../core/di/service_locator.dart';
 
 /// SignUp controller managing the state and business logic for the signup screen
@@ -84,7 +85,7 @@ class SignUpController extends GetxController {
 
     // Validate password match
     if (passwordController.text != confirmPasswordController.text) {
-      _showErrorMessage('Passwords do not match');
+      _showErrorMessage(AppStrings.passwordsDoNotMatch);
       return;
     }
 
@@ -97,7 +98,7 @@ class SignUpController extends GetxController {
 
       // Validate password length
       if (password.length < 6) {
-        _showErrorMessage('Password must be at least 6 characters');
+        _showErrorMessage(AppStrings.passwordMinLength);
         isLoading.value = false;
         return;
       }
@@ -113,11 +114,11 @@ class SignUpController extends GetxController {
       
       // Verify user data was loaded successfully
       if (ServiceLocator.userController.currentUser.value == null) {
-        throw Exception('Account created but failed to load user data. Please try logging in.');
+        throw Exception(AppStrings.accountCreatedFailedLoad);
       }
 
       // On success, show success message and navigate to home
-      _showSuccessMessage('Account created successfully');
+      _showSuccessMessage(AppStrings.accountCreatedSuccessfully);
       
       // Navigate to home screen after successful signup
       _context!.go(AppRoutes.home);
@@ -169,7 +170,7 @@ class SignUpController extends GetxController {
     if (_context != null) {
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text('Please fill all fields correctly'),
+          content: Text(AppStrings.pleaseFillAllFieldsCorrectly),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),

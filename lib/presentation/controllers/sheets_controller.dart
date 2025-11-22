@@ -50,7 +50,7 @@ class SheetsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           SnackBar(
-            content: Text('Failed to load sheets: ${e.toString()}'),
+            content: Text('${AppStrings.failedToLoadSheets}: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -167,7 +167,7 @@ class SheetsController extends GetxController {
         if (_context != null) {
           ScaffoldMessenger.of(_context!).showSnackBar(
             const SnackBar(
-              content: Text('User not authenticated'),
+              content: Text(AppStrings.userNotAuthenticated),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -186,7 +186,7 @@ class SheetsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           const SnackBar(
-            content: Text('Sheet created successfully'),
+            content: Text(AppStrings.sheetCreatedSuccessfully),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -197,7 +197,7 @@ class SheetsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           SnackBar(
-            content: Text('Failed to create sheet: ${e.toString()}'),
+            content: Text('${AppStrings.failedToCreateSheet}: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

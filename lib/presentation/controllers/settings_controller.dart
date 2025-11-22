@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:pennywise/core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +12,7 @@ import 'package:flutter/cupertino.dart';
 class SettingsController extends GetxController {
   // Observable state variables for settings
   final RxBool is24hrClock = false.obs;
-  final RxBool enableEODReminder = true.obs;
+  final RxBool enableEODReminder = false.obs;
   final RxString selectedCurrency = 'INR'.obs;
   final RxList<String> currencies = <String>[].obs;
   final RxBool isLoadingCurrencies = false.obs;
@@ -20,7 +21,7 @@ class SettingsController extends GetxController {
   // Original values to track changes
   String _originalCurrency = 'INR';
   bool _originalIs24hrClock = false;
-  bool _originalEnableEODReminder = true;
+  bool _originalEnableEODReminder = false;
 
   // Computed observable for unsaved changes
   bool get hasUnsavedChanges => selectedCurrency.value != _originalCurrency ||
@@ -73,7 +74,7 @@ class SettingsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           SnackBar(
-            content: Text('Failed to load currencies: ${e.toString()}'),
+            content: Text('${AppStrings.failedToLoadCurrencies}: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -105,7 +106,7 @@ class SettingsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           const SnackBar(
-            content: Text('No user data found. Please log in again.'),
+            content: Text(AppStrings.noUserDataFound),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -137,7 +138,7 @@ class SettingsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           const SnackBar(
-            content: Text('Settings saved successfully'),
+            content: Text(AppStrings.settingsSavedSuccessfully),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -148,7 +149,7 @@ class SettingsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           SnackBar(
-            content: Text('Failed to save settings: ${e.toString()}'),
+            content: Text('${AppStrings.failedToSaveSettings}: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -162,8 +163,7 @@ class SettingsController extends GetxController {
   /// Navigates to categories screen
   void navigateToCategories() {
     if (_context != null) {
-      // TODO: Navigate to categories screen
-      // _context!.go('/categories');
+      _context!.push('/home/categories');
     }
   }
 
@@ -173,7 +173,7 @@ class SettingsController extends GetxController {
       if (_context != null && currencies.isEmpty) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           const SnackBar(
-            content: Text('No currencies available'),
+            content: Text(AppStrings.noCurrenciesAvailable),
             backgroundColor: Colors.orange,
             behavior: SnackBarBehavior.floating,
           ),
@@ -229,18 +229,18 @@ class SettingsController extends GetxController {
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
+                        child: Text(
+                          AppStrings.cancel,
+                          style: const TextStyle(
                             fontSize: 16,
                             color: CupertinoColors.activeBlue,
                           ),
                         ),
                       ),
-                      const Material(
+                      Material(
                         child: Text(
-                          'Select Currency',
-                          style: TextStyle(
+                          AppStrings.selectCurrency,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -256,9 +256,9 @@ class SettingsController extends GetxController {
                           }
                           Navigator.of(context).pop();
                         },
-                        child: const Text(
-                          'Done',
-                          style: TextStyle(
+                        child: Text(
+                          AppStrings.done,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: CupertinoColors.activeBlue,
@@ -317,7 +317,7 @@ class SettingsController extends GetxController {
       if (_context != null) {
         ScaffoldMessenger.of(_context!).showSnackBar(
           SnackBar(
-            content: Text('Logout failed: ${e.toString()}'),
+            content: Text('${AppStrings.logoutFailed}: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

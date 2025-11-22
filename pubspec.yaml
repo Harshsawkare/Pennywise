@@ -54,6 +54,9 @@ dependencies:
   
   # Date and number formatting
   intl: ^0.19.0
+  
+  # Color picker widget
+  flex_color_picker: ^3.7.0
 
 dev_dependencies:
   flutter_test:

@@ -227,6 +227,14 @@ try {
 - Never hardcode colors, sizes, or strings in widgets
 - Import constants from `core/constants/`
 
+### String Management
+- **NO hardcoded strings are allowed anywhere in the app**
+- All user-facing strings must be defined in `AppStrings` class
+- This includes: button labels, error messages, success messages, validation messages, placeholders, titles, subtitles, dialog messages, snackbar messages, and any other text displayed to users
+- When adding new features, add all required strings to `AppStrings` first
+- Use descriptive constant names that clearly indicate the string's purpose (e.g., `loginSuccessful`, `pleaseEnterValidAmount`)
+- For dynamic strings that require interpolation, include the variable part in the constant (e.g., `'${AppStrings.failedToAddEntry}: ${e.toString()}'`)
+
 ## Documentation
 
 ### Comments

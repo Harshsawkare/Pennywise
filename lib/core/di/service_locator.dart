@@ -38,8 +38,8 @@ class ServiceLocator {
   /// Should be called once at app startup
   static void init() {
     // Initialize repositories
-    _authRepository = AuthRepositoryImpl();
     _configRepository = ConfigRepositoryImpl();
+    _authRepository = AuthRepositoryImpl(configRepository: _configRepository!);
     _userRepository = UserRepositoryImpl();
     _sheetRepository = SheetRepositoryImpl();
     _entryRepository = EntryRepositoryImpl();
