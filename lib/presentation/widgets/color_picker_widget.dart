@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_strings.dart';
 
 /// Color picker widget using flex_color_picker package
@@ -42,7 +43,7 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: AppConstants.verticalSpacing),
       child: ColorPicker(
         color: _selectedColor,
         onColorChanged: (Color color) {

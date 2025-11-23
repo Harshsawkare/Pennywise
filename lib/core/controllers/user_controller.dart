@@ -139,5 +139,18 @@ class UserController extends GetxController {
       throw Exception('Failed to update category: ${e.toString()}');
     }
   }
+
+  /// Deletes a category from the user's categories list
+  /// [category] - CategoryModel to delete
+  /// Throws [Exception] on failure
+  Future<void> deleteCategory(CategoryModel category) async {
+    try {
+      final categories = getCategories();
+      final updatedCategories = categories.where((c) => c.name != category.name).toList();
+      await updateCategories(updatedCategories);
+    } catch (e) {
+      throw Exception('Failed to delete category: ${e.toString()}');
+    }
+  }
 }
 

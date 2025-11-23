@@ -17,12 +17,20 @@ class CustomButton extends StatelessWidget {
   /// Whether button is disabled
   final bool isEnabled;
 
+  /// Custom border color (optional, overrides default)
+  final Color? borderColor;
+
+  /// Custom text color (optional, overrides default)
+  final Color? textColor;
+
   const CustomButton({
     super.key,
     required this.text,
     this.isPrimary = true,
     this.onPressed,
     this.isEnabled = true,
+    this.borderColor,
+    this.textColor,
   });
 
   @override
@@ -36,13 +44,14 @@ class CustomButton extends StatelessWidget {
           backgroundColor: isPrimary
               ? AppColors.blackColor
               : AppColors.whiteColor,
-          foregroundColor: isPrimary
-              ? AppColors.whiteColor
-              : AppColors.blackColor,
+          foregroundColor: textColor ??
+              (isPrimary
+                  ? AppColors.whiteColor
+                  : AppColors.blackColor),
           side: isPrimary
               ? null
-              : const BorderSide(
-                  color: AppColors.blackColor,
+              : BorderSide(
+                  color: borderColor ?? AppColors.blackColor,
                   width: 1.0,
                 ),
           shape: RoundedRectangleBorder(

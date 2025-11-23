@@ -43,5 +43,14 @@ abstract class SheetRepository {
     required double totalIncome,
     required double totalExpense,
   });
+
+  /// Deletes a sheet from Firestore
+  /// [uid] - User's unique identifier
+  /// [sheetId] - Sheet's unique identifier
+  /// Throws [Exception] on failure
+  Future<void> deleteSheet({
+    required String uid,
+    required String sheetId,
+  });
 }
 

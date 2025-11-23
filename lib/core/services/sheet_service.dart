@@ -96,5 +96,26 @@ class SheetService {
       totalExpense: totalExpense,
     );
   }
+
+  /// Deletes a sheet and all its entries
+  /// [uid] - User's unique identifier
+  /// [sheetId] - Sheet's unique identifier
+  /// Throws [Exception] on failure
+  Future<void> deleteSheet({
+    required String uid,
+    required String sheetId,
+  }) async {
+    if (uid.isEmpty) {
+      throw Exception('User ID cannot be empty');
+    }
+    if (sheetId.isEmpty) {
+      throw Exception('Sheet ID cannot be empty');
+    }
+
+    return await _sheetRepository.deleteSheet(
+      uid: uid,
+      sheetId: sheetId,
+    );
+  }
 }
 

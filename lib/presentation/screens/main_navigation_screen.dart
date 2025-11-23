@@ -49,7 +49,7 @@ class MainNavigationScreen extends StatelessWidget {
           onTap: controller.changeTab,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.blackColor,
-          unselectedItemColor: AppColors.lightGreyColor,
+          unselectedItemColor: AppColors.mediumGreyColor,
           backgroundColor: AppColors.whiteColor,
           elevation: 0,
           items: List.generate(

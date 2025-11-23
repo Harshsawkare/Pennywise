@@ -33,8 +33,10 @@ class AppStrings {
   static const String use24hrClock = 'Use 24hr clock';
   static const String use24hrClockSubtitle = 'Show 14:30 instead of 2:30 PM';
   static const String eodReminder = 'EOD Reminder';
-  static const String eodReminderSubtitle = 'Receive a notification everyday at 09:00 PM';
-  static const String eodReminder24Subtitle = 'Receive a notification everyday at 2100 hrs.';
+  static const String eodReminderSubtitle =
+      'Receive a notification everyday at 09:00 PM';
+  static const String eodReminder24Subtitle =
+      'Receive a notification everyday at 2100 hrs.';
   static const String logout = 'Logout.';
   static const String defaultCurrency = 'INR';
 
@@ -48,6 +50,7 @@ class AppStrings {
 
   // Add Entry Screen
   static const String newEntry = 'New Entry';
+  static const String editEntry = 'Edit Entry';
   static const String expense = 'Expense';
   static const String income = 'Income';
   static const String howMuch = 'How much?';
@@ -111,29 +114,63 @@ class AppStrings {
   static const String entryAddedSuccessfully = 'Entry added successfully';
   static const String failedToAddEntry = 'Failed to add entry';
   static const String failedToLoadEntries = 'Failed to load entries';
-  static const String failedToLoadUserData = 'Failed to load user data. Please try again.';
+  static const String failedToLoadUserData =
+      'Failed to load user data. Please try again.';
   static const String loginSuccessful = 'Login successful';
   static const String pleaseFillAllFields = 'Please fill all fields';
-  static const String pleaseFillAllFieldsCorrectly = 'Please fill all fields correctly';
+  static const String pleaseFillAllFieldsCorrectly =
+      'Please fill all fields correctly';
   static const String passwordsDoNotMatch = 'Passwords do not match';
-  static const String passwordMinLength = 'Password must be at least 6 characters';
-  static const String accountCreatedFailedLoad = 'Account created but failed to load user data. Please try logging in.';
-  static const String accountCreatedSuccessfully = 'Account created successfully';
+  static const String passwordMinLength =
+      'Password must be at least 6 characters';
+  static const String accountCreatedFailedLoad =
+      'Account created but failed to load user data. Please try logging in.';
+  static const String accountCreatedSuccessfully =
+      'Account created successfully';
   static const String failedToLoadCurrencies = 'Failed to load currencies';
-  static const String noUserDataFound = 'No user data found. Please log in again.';
+  static const String noUserDataFound =
+      'No user data found. Please log in again.';
   static const String settingsSavedSuccessfully = 'Settings saved successfully';
   static const String failedToSaveSettings = 'Failed to save settings';
   static const String noCurrenciesAvailable = 'No currencies available';
   static const String selectCurrency = 'Select Currency';
   static const String logoutFailed = 'Logout failed';
-  static const String categoryNameCannotBeEmpty = 'Category name cannot be empty';
+  static const String categoryNameCannotBeEmpty =
+      'Category name cannot be empty';
   static const String hexCodeCannotBeEmpty = 'Hex code cannot be empty';
   static const String invalidHexCodeFormat = 'Invalid hex code format';
   static const String noCategoriesYet = 'No categories yet';
+  static const String deleteCategory = 'Delete Category';
+  static const String deleteCategoryConfirmation =
+      'Are you sure you want to delete this category?';
+  static const String delete = 'Delete';
+  static const String categoryDeletedSuccessfully =
+      'Category deleted successfully';
+  static const String failedToDeleteCategory = 'Failed to delete category';
 
   // Sheets Screen Messages
   static const String failedToLoadSheets = 'Failed to load sheets';
   static const String sheetCreatedSuccessfully = 'Sheet created successfully';
   static const String failedToCreateSheet = 'Failed to create sheet';
-}
+  static const String deleteSheet = 'Delete Sheet';
+  static const String deleteSheetConfirmation =
+      'Are you sure you want to delete this sheet? All entries in this sheet will be deleted.';
+  static const String sheetDeletedSuccessfully = 'Sheet deleted successfully';
+  static const String failedToDeleteSheet = 'Failed to delete sheet';
+  static const String deleteEntry = 'Delete Entry';
+  static const String deleteEntryConfirmation =
+      'Are you sure you want to delete this entry?';
+  static const String entryDeletedSuccessfully = 'Entry deleted successfully';
+  static const String failedToDeleteEntry = 'Failed to delete entry';
+  static const String entryUpdatedSuccessfully = 'Entry updated successfully';
+  static const String failedToUpdateEntry = 'Failed to update entry';
 
+  // Analytics Screen
+  static const String analytics = 'Analytics';
+  static const String week = 'Week';
+  static const String month = 'Month';
+  static const String totalBalance = 'Total Balance';
+  static const String expensesByCategory = 'Expenses by Category';
+  static const String incomeByCategory = 'Income by Category';
+  static const String failedToLoadAnalytics = 'Failed to load analytics';
+}

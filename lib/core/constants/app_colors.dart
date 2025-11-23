@@ -30,6 +30,30 @@ class AppColors {
   /// Medium grey color for backgrounds
   static const int mediumGrey = 0xFF9E9E9E;
 
+  /// Red color for delete actions
+  static const int red = 0xFFE53935;
+
+  /// Light green color for income card background
+  static const int lightGreen = 0xFFE8F5E9;
+
+  /// Light red color for expense card background
+  static const int lightRed = 0xFFFFEBEE;
+
+  /// Purple gradient start color for total balance card
+  static const int purpleStart = 0xFF9C27B0;
+
+  /// Purple gradient end color for total balance card
+  static const int purpleEnd = 0xFFE91E63;
+
+  /// Yellow color for progress bars
+  static const int yellow = 0xFFFFEB3B;
+
+  /// Light teal color for progress bars
+  static const int lightTeal = 0xFFB2DFDB;
+
+  /// Light green for progress bars
+  static const int lightGreenProgress = 0xFFC8E6C9;
+
   // Material Color objects for easy use with Flutter widgets
   static const blackColor = Color(black);
   static const whiteColor = Color(white);
@@ -39,4 +63,12 @@ class AppColors {
   static const orangeColor = Color(orange);
   static const greenColor = Color(green);
   static const mediumGreyColor = Color(mediumGrey);
+  static const redColor = Color(red);
+  static const lightGreenColor = Color(lightGreen);
+  static const lightRedColor = Color(lightRed);
+  static const tealStartColor = tealColor;
+  static const tealEndColor = Color(lightTeal);
+  static const yellowColor = Color(yellow);
+  static const lightTealColor = Color(lightTeal);
+  static const lightGreenProgressColor = Color(lightGreenProgress);
 }

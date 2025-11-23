@@ -192,8 +192,24 @@ class ExampleService {
 - Create reusable widgets in `lib/presentation/widgets/`
 - Use `const` constructors when possible
 - Accept callbacks for user interactions
-- Follow Material Design guidelines
 - Use constants from `AppColors`, `AppConstants`, `AppStrings`
+
+### UI Components - Cupertino Design System
+- **Always use Cupertino components** for dialogs, pickers, and bottom sheets
+- Use `CupertinoAlertDialog` instead of `AlertDialog` for confirmation dialogs
+- Use `showCupertinoModalPopup` with `CupertinoDatePicker` instead of `showDatePicker`
+- Use `showCupertinoModalPopup` with `CupertinoDatePicker` (mode: time) instead of `showTimePicker`
+- Use `showCupertinoModalPopup` with `CupertinoPicker` for list selections
+- Use `CupertinoButton` instead of `TextButton` or `ElevatedButton` in Cupertino dialogs
+- Use `CupertinoTextField` instead of `TextField` in Cupertino bottom sheets
+- Use `CupertinoDialogAction` for dialog buttons with `isDestructiveAction: true` for destructive actions
+- Bottom sheets should use `CupertinoColors.systemBackground` for background color
+- Always wrap bottom sheets in `SafeArea` with `top: false`
+- Use `CupertinoColors.activeBlue` for primary actions
+- Use `CupertinoColors.secondaryLabel` for secondary/cancel actions
+- Use `CupertinoColors.label` for text in dialogs
+- **IMPORTANT**: When using Cupertino widgets, **always wrap Text widgets used as titles** (in `CupertinoAlertDialog`, `CupertinoListTile`, bottom sheet headers, etc.) with a `Material` widget to ensure proper text rendering
+- Example: `title: Material(child: Text('Title'))` or `Material(child: Text(AppStrings.title))`
 
 ## Error Handling
 
@@ -376,6 +392,11 @@ class AuthService {
 - ❌ Don't create deep widget trees - extract widgets
 - ❌ Don't mix concerns (UI logic with business logic)
 - ❌ Don't skip documentation for public APIs
+- ❌ Don't use Material `AlertDialog` - use `CupertinoAlertDialog`
+- ❌ Don't use Material `showDatePicker` - use `CupertinoDatePicker` in `showCupertinoModalPopup`
+- ❌ Don't use Material `showTimePicker` - use `CupertinoDatePicker` (time mode) in `showCupertinoModalPopup`
+- ❌ Don't use Material `Dialog` - use `CupertinoAlertDialog` or `showCupertinoModalPopup` with custom bottom sheet
+- ❌ Don't use Text widgets directly as titles in Cupertino widgets - always wrap with Material widget
 
 ## Code Review Checklist
 
@@ -389,4 +410,7 @@ class AuthService {
 - [ ] No direct repository access from controllers
 - [ ] Uses go_router for navigation
 - [ ] Properly handles async operations
+- [ ] Uses Cupertino components for dialogs, pickers, and bottom sheets
+- [ ] No Material AlertDialog, showDatePicker, or showTimePicker usage
+- [ ] Text widgets used as titles in Cupertino widgets are wrapped with Material widget
 

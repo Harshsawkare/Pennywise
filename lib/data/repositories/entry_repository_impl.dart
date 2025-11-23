@@ -114,6 +114,55 @@ class EntryRepositoryImpl implements EntryRepository {
   }
 
   @override
+  Future<EntryModel> updateEntry({
+    required String uid,
+    required String sheetId,
+    required String entryId,
+    required EntryModel entry,
+  }) async {
+    try {
+      final now = DateTime.now();
+
+      // Combine date and time into a single DateTime for storage
+      final dateTime = DateTime(
+        entry.date.year,
+        entry.date.month,
+        entry.date.day,
+        entry.time.hour,
+        entry.time.minute,
+      );
+
+      final entryData = {
+        'type': entry.type,
+        'amount': entry.amount,
+        'note': entry.note,
+        'date': Timestamp.fromDate(entry.date),
+        'time': Timestamp.fromDate(dateTime),
+        'category': entry.category,
+        'updatedOn': Timestamp.fromDate(now),
+      };
+
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('sheets')
+          .doc(sheetId)
+          .collection('entries')
+          .doc(entryId)
+          .update(entryData);
+
+      return entry.copyWith(
+        id: entryId,
+        updatedOn: now,
+        sheetId: sheetId,
+        userId: uid,
+      );
+    } catch (e) {
+      throw Exception('Failed to update entry: ${e.toString()}');
+    }
+  }
+
+  @override
   Future<void> deleteEntry({
     required String uid,
     required String sheetId,

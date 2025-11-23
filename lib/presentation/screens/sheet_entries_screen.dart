@@ -9,7 +9,9 @@ import '../../domain/models/sheet_model.dart';
 import '../../domain/models/entry_model.dart';
 import '../../domain/models/category_model.dart';
 import '../controllers/sheet_entries_controller.dart';
+import '../controllers/edit_entry_controller.dart';
 import '../../core/di/service_locator.dart';
+import '../../core/routes/app_routes.dart';
 import '../widgets/custom_button.dart';
 
 /// Sheet Entries screen - displays all entries for a specific sheet
@@ -275,10 +277,15 @@ class _DateGroup extends StatelessWidget {
 
         // Entry cards
         ...entries.map(
-          (entry) => _EntryCard(
+          (entry) => _DismissibleEntryCard(
             entry: entry,
             formatCurrency: formatCurrency,
             formatCurrencyWithSign: formatCurrencyWithSign,
+            onDelete: () {
+              // Get controller from context
+              final controller = Get.find<SheetEntriesController>();
+              controller.showDeleteEntryConfirmation(entry.id);
+            },
           ),
         ),
 
@@ -314,6 +321,72 @@ Color _hexToColor(String hexCode) {
     return AppColors.blackColor;
   } catch (e) {
     return AppColors.blackColor;
+  }
+}
+
+/// Dismissible entry card widget with swipe-to-delete
+class _DismissibleEntryCard extends StatelessWidget {
+  final EntryModel entry;
+  final String Function(double) formatCurrency;
+  final String Function(double) formatCurrencyWithSign;
+  final VoidCallback onDelete;
+
+  const _DismissibleEntryCard({
+    required this.entry,
+    required this.formatCurrency,
+    required this.formatCurrencyWithSign,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: Key(entry.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        onDelete();
+        return false; // Dialog handles deletion
+      },
+      child: GestureDetector(
+        onTap: () {
+          // Navigate to edit entry screen
+          final controller = Get.find<SheetEntriesController>();
+          if (controller.currentSheet.value != null) {
+            // Delete any existing edit entry controller to ensure fresh initialization
+            if (Get.isRegistered<EditEntryController>()) {
+              Get.delete<EditEntryController>();
+            }
+            context.push('${AppRoutes.home}${AppRoutes.editEntry}', extra: entry).then((_) {
+              // Reload entries after returning from edit screen
+              controller.loadEntries();
+              controller.reloadSheet();
+              // Clean up edit entry controller
+              if (Get.isRegistered<EditEntryController>()) {
+                Get.delete<EditEntryController>();
+              }
+            });
+          }
+        },
+        child: _EntryCard(
+          entry: entry,
+          formatCurrency: formatCurrency,
+          formatCurrencyWithSign: formatCurrencyWithSign,
+        ),
+      ),
+    );
   }
 }
 

@@ -185,17 +185,17 @@ class SheetEntriesController extends GetxController {
   void navigateToAddEntry() {
     if (_context == null || currentSheet.value == null) return;
 
-    _context!
+      _context!
         .push('${AppRoutes.home}/add-entry?sheetId=${currentSheet.value!.id}')
         .then((_) {
           // Reload entries and sheet after returning from add entry screen
           loadEntries();
-          _reloadSheet();
+          reloadSheet();
         });
   }
 
   /// Reloads the current sheet to get updated totals
-  Future<void> _reloadSheet() async {
+  Future<void> reloadSheet() async {
     if (currentSheet.value == null) return;
 
     try {
@@ -256,7 +256,7 @@ class SheetEntriesController extends GetxController {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Material(
-                        child:                         Text(
+                        child: Text(
                           AppStrings.selectCategory,
                           style: const TextStyle(
                             fontSize: 18,
@@ -285,7 +285,12 @@ class SheetEntriesController extends GetxController {
                               ),
                             ),
                           ),
-                          title: Text(AppStrings.allCategories),
+                          title: Material(
+                            child: Text(
+                              AppStrings.allCategories,
+                              style: TextStyle(color: AppColors.blackColor),
+                            ),
+                          ),
                           trailing:
                               selectedCategoryFilter.value == null ||
                                   selectedCategoryFilter.value?.isEmpty == true
@@ -315,35 +320,38 @@ class SheetEntriesController extends GetxController {
                         )
                       else
                         ...categories.map((category) {
-                          return Obx(
-                            () {
-                              final isSelected =
-                                  selectedCategoryFilter.value == category.name;
-                              return CupertinoListTile(
-                                leading: Container(
-                                  width: 4,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: _hexToColor(category.hexCode),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(12.0),
-                                    ),
+                          return Obx(() {
+                            final isSelected =
+                                selectedCategoryFilter.value == category.name;
+                            return CupertinoListTile(
+                              leading: Container(
+                                width: 4,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: _hexToColor(category.hexCode),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(12.0),
                                   ),
                                 ),
-                                title: Text(category.name),
-                                trailing: isSelected
-                                    ? const Icon(
-                                        CupertinoIcons.check_mark,
-                                        color: CupertinoColors.activeBlue,
-                                      )
-                                    : null,
-                                onTap: () {
-                                  selectedCategoryFilter.value = category.name;
-                                  Navigator.pop(context);
-                                },
-                              );
-                            },
-                          );
+                              ),
+                              title: Material(
+                                child: Text(
+                                  category.name,
+                                  style: TextStyle(color: AppColors.blackColor),
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? const Icon(
+                                      CupertinoIcons.check_mark,
+                                      color: CupertinoColors.activeBlue,
+                                    )
+                                  : null,
+                              onTap: () {
+                                selectedCategoryFilter.value = category.name;
+                                Navigator.pop(context);
+                              },
+                            );
+                          });
                         }),
                     ],
                   ),
@@ -351,6 +359,95 @@ class SheetEntriesController extends GetxController {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  /// Deletes an entry
+  /// [entryId] - Entry's unique identifier
+  Future<void> deleteEntry(String entryId) async {
+    if (_context == null || currentSheet.value == null) return;
+
+    try {
+      final userId = ServiceLocator.authService.getCurrentUserId();
+      if (userId == null) {
+        if (_context != null) {
+          ScaffoldMessenger.of(_context!).showSnackBar(
+            const SnackBar(
+              content: Text(AppStrings.userNotAuthenticated),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      await ServiceLocator.entryService.deleteEntry(
+        uid: userId,
+        sheetId: currentSheet.value!.id,
+        entryId: entryId,
+      );
+
+      // Remove entry from list
+      entries.removeWhere((entry) => entry.id == entryId);
+
+      // Reload sheet to update totals
+      await reloadSheet();
+
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.entryDeletedSuccessfully),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to delete entry: $e');
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          SnackBar(
+            content: Text('${AppStrings.failedToDeleteEntry}: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Shows delete confirmation dialog for an entry
+  void showDeleteEntryConfirmation(String entryId) {
+    if (_context == null) return;
+
+    showCupertinoDialog<void>(
+      context: _context!,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(AppStrings.deleteEntry),
+          content: Text(AppStrings.deleteEntryConfirmation),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                AppStrings.cancel,
+                style: const TextStyle(
+                  color: CupertinoColors.secondaryLabel,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteEntry(entryId);
+              },
+              child: Text(AppStrings.delete),
+            ),
+          ],
         );
       },
     );

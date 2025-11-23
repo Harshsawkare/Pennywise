@@ -6,14 +6,18 @@ import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../domain/models/category_model.dart';
+import '../../domain/models/entry_model.dart';
 
-/// Add Entry controller managing the state and business logic for the add entry screen
+/// Edit Entry controller managing the state and business logic for the edit entry screen
 /// Follows GetX state management pattern and SOLID principles
-class AddEntryController extends GetxController {
+class EditEntryController extends GetxController {
   // BuildContext for navigation
   BuildContext? _context;
 
-  /// Sheet ID this entry belongs to (optional)
+  /// Entry ID being edited
+  String? entryId;
+
+  /// Sheet ID this entry belongs to
   String? sheetId;
 
   /// Entry type: 'expense' or 'income'
@@ -45,16 +49,26 @@ class AddEntryController extends GetxController {
     _context = context;
   }
 
-  /// Sets the sheet ID for this entry
-  void setSheetId(String? id) {
-    sheetId = id;
+  /// Initializes the controller with an entry to edit
+  void initialize(EntryModel entry) {
+    entryId = entry.id;
+    sheetId = entry.sheetId;
+    entryType.value = entry.type;
+    amountController.text = entry.amount.abs().toString();
+    noteController.text = entry.note;
+    selectedDate.value = entry.date;
+    // Extract time from entry.time DateTime
+    // entry.time is a DateTime that includes both date and time
+    selectedTime.value = TimeOfDay(
+      hour: entry.time.hour,
+      minute: entry.time.minute,
+    );
+    selectedCategory.value = entry.category;
   }
 
   @override
   void onInit() {
     super.onInit();
-    // Reset fields when controller is initialized
-    resetFields();
     // Listen to user changes to refresh categories
     final userController = ServiceLocator.userController;
     ever(userController.currentUser, (_) {
@@ -309,24 +323,8 @@ class AddEntryController extends GetxController {
     }
   }
 
-  /// Resets all form fields to default values
-  void resetFields() {
-    amountController.clear();
-    noteController.clear();
-    entryType.value = 'expense';
-    selectedDate.value = DateTime.now();
-    selectedTime.value = TimeOfDay.now();
-    // Set default category if categories are available
-    final categories = getCategories();
-    if (categories.isNotEmpty) {
-      selectedCategory.value = categories.first.name;
-    } else {
-      selectedCategory.value = AppStrings.foodAndDrink;
-    }
-  }
-
-  /// Handles adding the entry
-  Future<void> addEntry() async {
+  /// Handles updating the entry
+  Future<void> updateEntry() async {
     if (_context == null) return;
 
     final amount = double.tryParse(amountController.text);
@@ -341,7 +339,7 @@ class AddEntryController extends GetxController {
       return;
     }
 
-    if (sheetId == null || sheetId!.isEmpty) {
+    if (sheetId == null || sheetId!.isEmpty || entryId == null || entryId!.isEmpty) {
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
           content: Text(AppStrings.sheetIdMissing),
@@ -374,9 +372,10 @@ class AddEntryController extends GetxController {
         selectedTime.value.minute,
       );
 
-      await ServiceLocator.entryService.createEntry(
+      await ServiceLocator.entryService.updateEntry(
         uid: userId,
         sheetId: sheetId!,
+        entryId: entryId!,
         type: entryType.value,
         amount: amount,
         note: noteController.text.trim(),
@@ -387,28 +386,118 @@ class AddEntryController extends GetxController {
 
       ScaffoldMessenger.of(_context!).showSnackBar(
         const SnackBar(
-          content: Text(AppStrings.entryAddedSuccessfully),
+          content: Text(AppStrings.entryUpdatedSuccessfully),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
       );
-
-      // Reset fields after successful save
-      resetFields();
 
       // Navigate back
       if (_context != null) {
         _context!.pop();
       }
     } catch (e) {
-      debugPrint('Failed to create entry: $e');
+      debugPrint('Failed to update entry: $e');
       ScaffoldMessenger.of(_context!).showSnackBar(
         SnackBar(
-          content: Text('${AppStrings.failedToAddEntry}: ${e.toString()}'),
+          content: Text('${AppStrings.failedToUpdateEntry}: ${e.toString()}'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
       );
     }
   }
+
+  /// Handles deleting the entry
+  Future<void> deleteEntry() async {
+    if (_context == null) return;
+
+    if (sheetId == null || sheetId!.isEmpty || entryId == null || entryId!.isEmpty) {
+      ScaffoldMessenger.of(_context!).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.sheetIdMissing),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final userId = ServiceLocator.authService.getCurrentUserId();
+      if (userId == null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.userNotAuthenticated),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      await ServiceLocator.entryService.deleteEntry(
+        uid: userId,
+        sheetId: sheetId!,
+        entryId: entryId!,
+      );
+
+      ScaffoldMessenger.of(_context!).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.entryDeletedSuccessfully),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Navigate back
+      if (_context != null) {
+        _context!.pop();
+      }
+    } catch (e) {
+      debugPrint('Failed to delete entry: $e');
+      ScaffoldMessenger.of(_context!).showSnackBar(
+        SnackBar(
+          content: Text('${AppStrings.failedToDeleteEntry}: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  /// Shows delete confirmation dialog
+  void showDeleteConfirmation() {
+    if (_context == null) return;
+
+    showCupertinoDialog<void>(
+      context: _context!,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(AppStrings.deleteEntry),
+          content: Text(AppStrings.deleteEntryConfirmation),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                AppStrings.cancel,
+                style: const TextStyle(
+                  color: CupertinoColors.secondaryLabel,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteEntry();
+              },
+              child: Text(AppStrings.delete),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+

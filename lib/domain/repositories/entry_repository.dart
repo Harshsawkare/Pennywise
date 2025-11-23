@@ -25,6 +25,20 @@ abstract class EntryRepository {
     required String sheetId,
   });
 
+  /// Updates an existing entry in Firestore
+  /// [uid] - User's unique identifier
+  /// [sheetId] - Sheet's unique identifier
+  /// [entryId] - Entry's unique identifier
+  /// [entry] - EntryModel with updated data
+  /// Returns the updated EntryModel
+  /// Throws [Exception] on failure
+  Future<EntryModel> updateEntry({
+    required String uid,
+    required String sheetId,
+    required String entryId,
+    required EntryModel entry,
+  });
+
   /// Deletes an entry from Firestore
   /// [uid] - User's unique identifier
   /// [sheetId] - Sheet's unique identifier

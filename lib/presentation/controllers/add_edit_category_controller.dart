@@ -142,6 +142,48 @@ class AddEditCategoryController extends GetxController {
     }
   }
 
+  /// Deletes the category being edited
+  /// Throws [Exception] on failure
+  Future<void> deleteCategory() async {
+    try {
+      if (editingCategory == null) {
+        throw Exception('No category to delete');
+      }
+
+      await _userController.deleteCategory(editingCategory!);
+
+      // Show success message
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.categoryDeletedSuccessfully),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
+      // Navigate back on success
+      if (_context != null) {
+        Navigator.of(_context!).pop();
+      }
+    } catch (e) {
+      // Show error message
+      if (_context != null) {
+        ScaffoldMessenger.of(_context!).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString().replaceFirst('Exception: ', ''),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      rethrow;
+    }
+  }
+
   @override
   void onClose() {
     nameController.dispose();

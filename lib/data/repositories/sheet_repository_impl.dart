@@ -151,5 +151,40 @@ class SheetRepositoryImpl implements SheetRepository {
       throw Exception('Failed to update sheet totals: ${e.toString()}');
     }
   }
+
+  @override
+  Future<void> deleteSheet({
+    required String uid,
+    required String sheetId,
+  }) async {
+    try {
+      // Delete all entries in the sheet first
+      final entriesSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('sheets')
+          .doc(sheetId)
+          .collection('entries')
+          .get();
+
+      final batch = _firestore.batch();
+      for (final doc in entriesSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Delete the sheet document
+      batch.delete(
+        _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('sheets')
+            .doc(sheetId),
+      );
+
+      await batch.commit();
+    } catch (e) {
+      throw Exception('Failed to delete sheet: ${e.toString()}');
+    }
+  }
 }
 

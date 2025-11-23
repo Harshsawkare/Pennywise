@@ -5,10 +5,12 @@ import '../../presentation/screens/signup_screen.dart';
 import '../../presentation/screens/main_navigation_screen.dart';
 import '../../presentation/screens/sheet_entries_screen.dart';
 import '../../presentation/screens/add_entry_screen.dart';
+import '../../presentation/screens/edit_entry_screen.dart';
 import '../../presentation/screens/categories_screen.dart';
 import '../../presentation/screens/add_edit_category_screen.dart';
 import '../../domain/models/sheet_model.dart';
 import '../../domain/models/category_model.dart';
+import '../../domain/models/entry_model.dart';
 import '../notifiers/auth_state_notifier.dart';
 import '../di/service_locator.dart';
 
@@ -24,6 +26,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String sheetEntries = '/sheet/:sheetId';
   static const String addEntry = '/add-entry';
+  static const String editEntry = '/edit-entry';
   static const String categories = '/categories';
   static const String addCategory = '/add-category';
   static const String editCategory = '/edit-category';
@@ -112,6 +115,14 @@ class AppRoutes {
               builder: (context, state) {
                 final sheetId = state.uri.queryParameters['sheetId'];
                 return AddEntryScreen(sheetId: sheetId);
+              },
+            ),
+            GoRoute(
+              path: 'edit-entry',
+              name: 'editEntry',
+              builder: (context, state) {
+                final entry = state.extra as EntryModel?;
+                return EditEntryScreen(entry: entry);
               },
             ),
             GoRoute(

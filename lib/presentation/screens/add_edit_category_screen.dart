@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
@@ -15,21 +16,21 @@ import '../../domain/models/category_model.dart';
 class AddEditCategoryScreen extends StatelessWidget {
   final CategoryModel? category;
 
-  const AddEditCategoryScreen({
-    super.key,
-    this.category,
-  });
+  const AddEditCategoryScreen({super.key, this.category});
 
   @override
   Widget build(BuildContext context) {
     // Initialize GetX controller
-    final AddEditCategoryController controller =
-        Get.put(AddEditCategoryController());
+    final AddEditCategoryController controller = Get.put(
+      AddEditCategoryController(),
+    );
     controller.setContext(context);
     controller.initialize(category);
 
     final isEditMode = category != null;
-    final title = isEditMode ? AppStrings.editCategory : AppStrings.addCategories;
+    final title = isEditMode
+        ? AppStrings.editCategory
+        : AppStrings.addCategories;
     final buttonText = isEditMode ? AppStrings.update : AppStrings.add;
 
     return Scaffold(
@@ -77,7 +78,6 @@ class AddEditCategoryScreen extends StatelessWidget {
                   controller.onHexCodeChanged(value);
                 },
               ),
-              const SizedBox(height: 24),
               // Color picker
               Obx(
                 () => ColorPickerWidget(
@@ -89,6 +89,72 @@ class AddEditCategoryScreen extends StatelessWidget {
               ),
               // Spacer to push button to bottom
               const Spacer(),
+              // Delete button (only in edit mode)
+              if (isEditMode)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: AppConstants.verticalSpacing,
+                  ),
+                  child: SizedBox(
+                    height: AppConstants.buttonHeight,
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        // Show confirmation dialog
+                        final shouldDelete = await showCupertinoDialog<bool>(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return CupertinoAlertDialog(
+                              title: Text(AppStrings.deleteCategory),
+                              content: Text(
+                                AppStrings.deleteCategoryConfirmation,
+                              ),
+                              actions: [
+                                CupertinoDialogAction(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop(false);
+                                  },
+                                  child: Text(AppStrings.cancel),
+                                ),
+                                CupertinoDialogAction(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop(true);
+                                  },
+                                  isDestructiveAction: true,
+                                  child: Text(AppStrings.delete),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (shouldDelete == true) {
+                          try {
+                            await controller.deleteCategory();
+                          } catch (e) {
+                            // Error is already shown in the controller
+                          }
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red, width: 1.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadius,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        AppStrings.deleteCategory,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               // Add/Update button
               Padding(
                 padding: const EdgeInsets.only(
@@ -113,4 +179,3 @@ class AddEditCategoryScreen extends StatelessWidget {
     );
   }
 }
-

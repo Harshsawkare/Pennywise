@@ -5,27 +5,29 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
-import '../controllers/add_entry_controller.dart';
+import '../controllers/edit_entry_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../../domain/models/category_model.dart';
+import '../../domain/models/entry_model.dart';
 
-/// Add Entry screen for creating new expense or income entries
-class AddEntryScreen extends StatelessWidget {
-  final String? sheetId;
+/// Edit Entry screen for editing existing expense or income entries
+class EditEntryScreen extends StatelessWidget {
+  final EntryModel? entry;
 
-  const AddEntryScreen({super.key, this.sheetId});
+  const EditEntryScreen({super.key, this.entry});
 
   @override
   Widget build(BuildContext context) {
     // Initialize GetX controller
-    final AddEntryController controller = Get.put(AddEntryController());
+    final EditEntryController controller = Get.put(EditEntryController());
     controller.setContext(context);
-    if (sheetId != null) {
-      controller.setSheetId(sheetId);
+    
+    // Initialize controller with entry data if provided
+    // Always initialize to ensure we have the correct entry data
+    if (entry != null) {
+      controller.initialize(entry!);
     }
-    // Reset fields when screen is opened to ensure clean state
-    controller.resetFields();
 
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
@@ -40,7 +42,7 @@ class AddEntryScreen extends StatelessWidget {
           onTap: () => context.pop(),
         ),
         title: const Text(
-          AppStrings.newEntry,
+          AppStrings.editEntry,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -126,18 +128,32 @@ class AddEntryScreen extends StatelessWidget {
                 );
               }),
 
-              // Spacer to push button to bottom
+              // Spacer to push buttons to bottom
               const Spacer(),
 
-              // Add button
+              // Delete button
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: AppConstants.verticalSpacing,
+                ),
+                child: CustomButton(
+                  text: AppStrings.deleteEntry,
+                  isPrimary: false,
+                  onPressed: controller.showDeleteConfirmation,
+                  borderColor: AppColors.redColor,
+                  textColor: AppColors.redColor,
+                ),
+              ),
+
+              // Update button
               Padding(
                 padding: const EdgeInsets.only(
                   bottom: AppConstants.largeVerticalSpacing,
                 ),
                 child: CustomButton(
-                  text: AppStrings.add,
+                  text: AppStrings.update,
                   isPrimary: true,
-                  onPressed: controller.addEntry,
+                  onPressed: controller.updateEntry,
                 ),
               ),
             ],
@@ -163,7 +179,7 @@ class _ExpenseIncomeToggle extends StatelessWidget {
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: AppColors.lightGreyColor.withValues(alpha: 0.3),
+        color: AppColors.lightGreyColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Row(
@@ -256,7 +272,7 @@ class _DateTimePickerField extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.lightGreyColor.withValues(alpha: 0.3),
+                color: AppColors.lightGreyColor.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: Text(
@@ -439,3 +455,4 @@ class _CategoryPicker extends StatelessWidget {
     );
   }
 }
+
