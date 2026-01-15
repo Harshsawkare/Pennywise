@@ -6,6 +6,8 @@ A comprehensive money tracking and expense management application built with Flu
 
 Pennywise simplifies personal finance management by providing an intuitive platform to track income and expenses across multiple sheets, visualize spending patterns, and make informed financial decisions.
 
+<img width="2459" height="1384" alt="Pennywise" src="https://github.com/user-attachments/assets/7c0c5677-985b-47f9-a641-4ee05a80a298" />
+
 ## Features
 
 ### Core Features
