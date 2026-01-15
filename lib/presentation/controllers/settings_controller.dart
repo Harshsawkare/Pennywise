@@ -6,6 +6,7 @@ import '../../core/constants/app_strings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Settings controller managing the state and business logic for the settings screen
 /// Follows GetX state management pattern and SOLID principles
@@ -71,15 +72,10 @@ class SettingsController extends GetxController {
       currencies.value = currenciesList;
     } catch (e) {
       // Show error message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToLoadCurrencies}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToLoadCurrencies}: ${e.toString()}',
+      );
     } finally {
       isLoadingCurrencies.value = false;
     }
@@ -103,15 +99,7 @@ class SettingsController extends GetxController {
     final currentUser = userController.currentUser.value;
 
     if (currentUser == null) {
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.noUserDataFound),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.noUserDataFound);
       return;
     }
 
@@ -135,26 +123,13 @@ class SettingsController extends GetxController {
       _originalEnableEODReminder = enableEODReminder.value;
 
       // Show success message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.settingsSavedSuccessfully),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.settingsSavedSuccessfully);
     } catch (e) {
       // Show error message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToSaveSettings}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToSaveSettings}: ${e.toString()}',
+      );
     } finally {
       isSaving.value = false;
     }
@@ -171,13 +146,7 @@ class SettingsController extends GetxController {
   void navigateToCurrency() {
     if (_context == null || currencies.isEmpty) {
       if (_context != null && currencies.isEmpty) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.noCurrenciesAvailable),
-            backgroundColor: Colors.orange,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        SnackbarUtil.show(_context, AppStrings.noCurrenciesAvailable);
       }
       return;
     }
@@ -314,15 +283,10 @@ class SettingsController extends GetxController {
       _context!.go(AppRoutes.login);
     } catch (e) {
       // Show error message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.logoutFailed}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.logoutFailed}: ${e.toString()}',
+      );
     }
   }
 

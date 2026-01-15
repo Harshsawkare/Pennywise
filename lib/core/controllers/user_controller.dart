@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../domain/models/user_model.dart';
 import '../../domain/models/category_model.dart';
+import '../../domain/models/user_tier.dart';
 import '../services/user_service.dart';
 import '../di/service_locator.dart';
 
@@ -62,6 +63,12 @@ class UserController extends GetxController {
   /// Returns default true if no user is loaded
   bool getEnableEODReminder() {
     return currentUser.value?.enableEODReminder ?? false;
+  }
+
+  /// Gets the current user's subscription tier
+  /// Returns default UserTier.freemium if no user is loaded
+  UserTier getTier() {
+    return currentUser.value?.tier ?? UserTier.freemium;
   }
 
   /// Gets the current user's categories list

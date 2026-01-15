@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/di/service_locator.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Sheet Entries controller managing the state and business logic for sheet entries screen
 /// Follows GetX state management pattern and SOLID principles
@@ -65,15 +66,10 @@ class SheetEntriesController extends GetxController {
       entries.value = loadedEntries;
     } catch (e) {
       debugPrint('Failed to load entries: $e');
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToLoadEntries}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToLoadEntries}: ${e.toString()}',
+      );
       entries.value = [];
     }
   }
@@ -372,15 +368,7 @@ class SheetEntriesController extends GetxController {
     try {
       final userId = ServiceLocator.authService.getCurrentUserId();
       if (userId == null) {
-        if (_context != null) {
-          ScaffoldMessenger.of(_context!).showSnackBar(
-            const SnackBar(
-              content: Text(AppStrings.userNotAuthenticated),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        SnackbarUtil.show(_context, AppStrings.userNotAuthenticated);
         return;
       }
 
@@ -396,26 +384,13 @@ class SheetEntriesController extends GetxController {
       // Reload sheet to update totals
       await reloadSheet();
 
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.entryDeletedSuccessfully),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.entryDeletedSuccessfully);
     } catch (e) {
       debugPrint('Failed to delete entry: $e');
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToDeleteEntry}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToDeleteEntry}: ${e.toString()}',
+      );
     }
   }
 

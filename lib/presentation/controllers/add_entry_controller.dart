@@ -6,6 +6,7 @@ import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../domain/models/category_model.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Add Entry controller managing the state and business logic for the add entry screen
 /// Follows GetX state management pattern and SOLID principles
@@ -331,37 +332,19 @@ class AddEntryController extends GetxController {
 
     final amount = double.tryParse(amountController.text);
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.pleaseEnterValidAmount),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      SnackbarUtil.show(_context, AppStrings.pleaseEnterValidAmount);
       return;
     }
 
     if (sheetId == null || sheetId!.isEmpty) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.sheetIdMissing),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      SnackbarUtil.show(_context, AppStrings.sheetIdMissing);
       return;
     }
 
     try {
       final userId = ServiceLocator.authService.getCurrentUserId();
       if (userId == null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.userNotAuthenticated),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        SnackbarUtil.show(_context, AppStrings.userNotAuthenticated);
         return;
       }
 
@@ -385,13 +368,7 @@ class AddEntryController extends GetxController {
         category: selectedCategory.value,
       );
 
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.entryAddedSuccessfully),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      SnackbarUtil.show(_context, AppStrings.entryAddedSuccessfully);
 
       // Reset fields after successful save
       resetFields();
@@ -402,12 +379,9 @@ class AddEntryController extends GetxController {
       }
     } catch (e) {
       debugPrint('Failed to create entry: $e');
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        SnackBar(
-          content: Text('${AppStrings.failedToAddEntry}: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToAddEntry}: ${e.toString()}',
       );
     }
   }

@@ -173,4 +173,14 @@ class AppStrings {
   static const String expensesByCategory = 'Expenses by Category';
   static const String incomeByCategory = 'Income by Category';
   static const String failedToLoadAnalytics = 'Failed to load analytics';
+
+  // Splits Screen
+  static const String comingSoon = 'Coming Soon';
+  static const String comingSoonMessage =
+      'Split expenses with friends and family. This feature will be available soon!';
+
+  // Premium Features
+  static const String getPremium = 'Get Premium';
+  static const String analyticsPremiumMessage =
+      'Upgrade to Premium to unlock detailed analytics and insights about your finances.';
 }

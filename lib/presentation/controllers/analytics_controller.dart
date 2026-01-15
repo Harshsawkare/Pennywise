@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import '../../domain/models/entry_model.dart';
 import '../../domain/models/category_model.dart';
+import '../../domain/models/user_tier.dart';
 import '../../core/services/entry_service.dart';
 import '../../core/services/sheet_service.dart';
 import '../../core/di/service_locator.dart';
@@ -51,11 +52,9 @@ class AnalyticsController extends GetxController {
   /// Constructor with dependency injection
   /// [entryService] - Entry service instance (defaults to ServiceLocator)
   /// [sheetService] - Sheet service instance (defaults to ServiceLocator)
-  AnalyticsController({
-    EntryService? entryService,
-    SheetService? sheetService,
-  })  : _entryService = entryService ?? ServiceLocator.entryService,
-        _sheetService = sheetService ?? ServiceLocator.sheetService;
+  AnalyticsController({EntryService? entryService, SheetService? sheetService})
+    : _entryService = entryService ?? ServiceLocator.entryService,
+      _sheetService = sheetService ?? ServiceLocator.sheetService;
 
   @override
   void onInit() {
@@ -74,6 +73,17 @@ class AnalyticsController extends GetxController {
   Future<void> loadAnalytics() async {
     try {
       isLoading.value = true;
+
+      // Check if user has premium tier
+      final userController = ServiceLocator.userController;
+      final tier = userController.getTier();
+
+      if (tier == UserTier.freemium) {
+        // Don't load analytics data for freemium users
+        _resetAnalytics();
+        isLoading.value = false;
+        return;
+      }
 
       final userId = ServiceLocator.authService.getCurrentUserId();
       if (userId == null) {
@@ -214,4 +224,3 @@ class AnalyticsController extends GetxController {
     incomeCategories.value = [];
   }
 }
-

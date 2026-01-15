@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'category_model.dart';
+import 'user_tier.dart';
 
 /// User model representing user data from Firestore
 /// Follows clean architecture by keeping domain layer model simple
@@ -31,6 +32,9 @@ class UserModel {
   /// User's categories list
   final List<CategoryModel> categories;
 
+  /// User's subscription tier
+  final UserTier tier;
+
   /// Constructor
   const UserModel({
     required this.uid,
@@ -42,6 +46,7 @@ class UserModel {
     required this.is24h,
     required this.enableEODReminder,
     required this.categories,
+    required this.tier,
   });
 
   /// Creates UserModel from Firestore document snapshot
@@ -72,6 +77,7 @@ class UserModel {
       is24h: data['is24h'] as bool? ?? false,
       enableEODReminder: data['enableEODReminder'] as bool? ?? false,
       categories: categoriesList,
+      tier: UserTier.fromString(data['tier'] as String?),
     );
   }
 
@@ -101,6 +107,7 @@ class UserModel {
       is24h: data['is24h'] as bool? ?? false,
       enableEODReminder: data['enableEODReminder'] as bool? ?? false,
       categories: categoriesList,
+      tier: UserTier.fromString(data['tier'] as String?),
     );
   }
 
@@ -116,6 +123,7 @@ class UserModel {
       'is24h': is24h,
       'enableEODReminder': enableEODReminder,
       'categories': categories.map((e) => e.toMap()).toList(),
+      'tier': tier.value,
     };
   }
 
@@ -130,6 +138,7 @@ class UserModel {
     bool? is24h,
     bool? enableEODReminder,
     List<CategoryModel>? categories,
+    UserTier? tier,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -141,6 +150,7 @@ class UserModel {
       is24h: is24h ?? this.is24h,
       enableEODReminder: enableEODReminder ?? this.enableEODReminder,
       categories: categories ?? this.categories,
+      tier: tier ?? this.tier,
     );
   }
 }

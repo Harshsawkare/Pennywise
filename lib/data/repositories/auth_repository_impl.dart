@@ -181,6 +181,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'is24h': true,
         'enableEODReminder': false,
         'categories': defaultCategories,
+        'tier': 'freemium',
       });
     } catch (e) {
       throw Exception('Failed to save user data: ${e.toString()}');

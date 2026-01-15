@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
+import '../../domain/models/user_tier.dart';
 import '../controllers/analytics_controller.dart';
 
 /// Analytics screen - displays financial analytics and insights
@@ -24,141 +26,235 @@ class AnalyticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize GetX controller
     final AnalyticsController controller = Get.put(AnalyticsController());
+    final userController = ServiceLocator.userController;
 
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.horizontalPadding,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Title section
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: AppConstants.largeVerticalSpacing,
-                  bottom: AppConstants.largeVerticalSpacing,
-                ),
-                child: Text(
-                  AppStrings.analyticsTab,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.blackColor,
-                  ),
-                ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.horizontalPadding,
               ),
-              // Segment Control for Week/Month
-              Obx(() => _buildSegmentControl(controller)),
-              Expanded(
-                child: Obx(
-                  () => controller.isLoading.value
-                      ? const Center(child: CircularProgressIndicator())
-                      : ListView(
-                          shrinkWrap: true,
-                          children: [
-                            const SizedBox(
-                              height: AppConstants.verticalSpacing,
-                            ),
-
-                            // Summary Cards
-                            Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title section
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: AppConstants.largeVerticalSpacing,
+                      bottom: AppConstants.largeVerticalSpacing,
+                    ),
+                    child: Text(
+                      AppStrings.analyticsTab,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.blackColor,
+                      ),
+                    ),
+                  ),
+                  // Segment Control for Week/Month
+                  Obx(() => _buildSegmentControl(controller)),
+                  Expanded(
+                    child: Obx(
+                      () => controller.isLoading.value
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView(
+                              shrinkWrap: true,
                               children: [
-                                Expanded(
-                                  child: _buildSummaryCard(
-                                    icon: Icons.trending_up,
-                                    label: AppStrings.income,
-                                    amount: controller.totalIncome.value,
-                                    color: AppColors.greenColor,
-                                    backgroundColor: AppColors.lightGreenColor,
-                                  ),
+                                const SizedBox(
+                                  height: AppConstants.verticalSpacing,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildSummaryCard(
-                                    icon: Icons.trending_down,
-                                    label: AppStrings.expense,
-                                    amount: controller.totalExpense.value,
-                                    color: AppColors.redColor,
-                                    backgroundColor: AppColors.lightRedColor,
-                                  ),
+
+                                // Summary Cards
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildSummaryCard(
+                                        icon: Icons.trending_up,
+                                        label: AppStrings.income,
+                                        amount: controller.totalIncome.value,
+                                        color: AppColors.greenColor,
+                                        backgroundColor:
+                                            AppColors.lightGreenColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _buildSummaryCard(
+                                        icon: Icons.trending_down,
+                                        label: AppStrings.expense,
+                                        amount: controller.totalExpense.value,
+                                        color: AppColors.redColor,
+                                        backgroundColor:
+                                            AppColors.lightRedColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+
+                                const SizedBox(
+                                  height: AppConstants.verticalSpacing,
+                                ),
+
+                                // Total Balance Card
+                                _buildTotalBalanceCard(controller),
+
+                                const SizedBox(
+                                  height: AppConstants.largeVerticalSpacing,
+                                ),
+
+                                // Expenses by Category
+                                if (controller
+                                    .expenseCategories
+                                    .isNotEmpty) ...[
+                                  Material(
+                                    child: Text(
+                                      AppStrings.expensesByCategory,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.mediumGreyColor,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: AppConstants.verticalSpacing,
+                                  ),
+                                  ...controller.expenseCategories.map(
+                                    (category) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: _buildCategoryItem(
+                                        category: category,
+                                        totalAmount:
+                                            controller.totalExpense.value,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: AppConstants.largeVerticalSpacing,
+                                  ),
+                                ],
+
+                                // Income by Category
+                                if (controller.incomeCategories.isNotEmpty) ...[
+                                  Material(
+                                    child: Text(
+                                      AppStrings.incomeByCategory,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.mediumGreyColor,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: AppConstants.verticalSpacing,
+                                  ),
+                                  ...controller.incomeCategories.map(
+                                    (category) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: _buildCategoryItem(
+                                        category: category,
+                                        totalAmount:
+                                            controller.totalIncome.value,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Blur overlay for freemium users
+            Obx(() {
+              final user = userController.currentUser.value;
+              final isFreemium =
+                  (user?.tier ?? UserTier.freemium) == UserTier.freemium;
+              if (!isFreemium) return const SizedBox.shrink();
 
-                            const SizedBox(
-                              height: AppConstants.verticalSpacing,
+              return Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: AppColors.whiteColor.withValues(alpha: 0.3),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.horizontalPadding,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: BoxBorder.all(width: 3)
+                              ),
+                              child: const Icon(
+                                Icons.bolt_rounded,
+                                size: 40,
+                                color: AppColors.blackColor,
+                              ),
                             ),
-
-                            // Total Balance Card
-                            _buildTotalBalanceCard(controller),
-
-                            const SizedBox(
-                              height: AppConstants.largeVerticalSpacing,
+                            const SizedBox(height: 16),
+                            Material(
+                              color: Colors.transparent,
+                              child: Text(
+                                AppStrings.analyticsPremiumMessage,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.mediumGreyColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-
-                            // Expenses by Category
-                            if (controller.expenseCategories.isNotEmpty) ...[
-                              Material(
+                            const SizedBox(height: 32),
+                            ElevatedButton(
+                              onPressed: () {
+                                // TODO: Navigate to premium upgrade screen
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.blackColor,
+                                foregroundColor: AppColors.whiteColor,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 30,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
                                 child: Text(
-                                  AppStrings.expensesByCategory,
+                                  AppStrings.getPremium,
                                   style: const TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.mediumGreyColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                height: AppConstants.verticalSpacing,
-                              ),
-                              ...controller.expenseCategories.map(
-                                (category) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _buildCategoryItem(
-                                    category: category,
-                                    totalAmount: controller.totalExpense.value,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: AppConstants.largeVerticalSpacing,
-                              ),
-                            ],
-
-                            // Income by Category
-                            if (controller.incomeCategories.isNotEmpty) ...[
-                              Material(
-                                child: Text(
-                                  AppStrings.incomeByCategory,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.mediumGreyColor,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: AppConstants.verticalSpacing,
-                              ),
-                              ...controller.incomeCategories.map(
-                                (category) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _buildCategoryItem(
-                                    category: category,
-                                    totalAmount: controller.totalIncome.value,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ],
                         ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              );
+            }),
+          ],
         ),
       ),
     );

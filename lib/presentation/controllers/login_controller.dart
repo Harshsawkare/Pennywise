@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/di/service_locator.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Login controller managing the state and business logic for the login screen
 /// Follows GetX state management pattern and SOLID principles
@@ -110,43 +111,19 @@ class LoginController extends GetxController {
     }
   }
 
-  /// Shows success message using ScaffoldMessenger
+  /// Shows success message using SnackbarUtil
   void _showSuccessMessage(String message) {
-    if (_context != null) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    SnackbarUtil.show(_context, message);
   }
 
-  /// Shows error message using ScaffoldMessenger
+  /// Shows error message using SnackbarUtil
   void _showErrorMessage(String message) {
-    if (_context != null) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    SnackbarUtil.show(_context, message);
   }
 
   /// Shows validation error message
   void _showValidationError() {
-    if (_context != null) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.pleaseFillAllFields),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    SnackbarUtil.show(_context, AppStrings.pleaseFillAllFields);
   }
 
   @override

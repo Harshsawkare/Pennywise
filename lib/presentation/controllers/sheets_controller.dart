@@ -5,6 +5,7 @@ import '../../domain/models/sheet_model.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Helper class to store sheet with its last entry date
 class SheetWithLastEntry {
@@ -96,15 +97,10 @@ class SheetsController extends GetxController {
       sheetsWithLastEntry.value = sheetsWithDates;
     } catch (e) {
       debugPrint('Failed to load sheets: $e');
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToLoadSheets}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToLoadSheets}: ${e.toString()}',
+      );
       sheetsWithLastEntry.value = [];
     }
   }
@@ -214,15 +210,7 @@ class SheetsController extends GetxController {
     try {
       final userId = ServiceLocator.authService.getCurrentUserId();
       if (userId == null) {
-        if (_context != null) {
-          ScaffoldMessenger.of(_context!).showSnackBar(
-            const SnackBar(
-              content: Text(AppStrings.userNotAuthenticated),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        SnackbarUtil.show(_context, AppStrings.userNotAuthenticated);
         return;
       }
 
@@ -234,26 +222,13 @@ class SheetsController extends GetxController {
       // Reload sheets to ensure proper sorting
       await loadSheets();
 
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.sheetCreatedSuccessfully),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.sheetCreatedSuccessfully);
     } catch (e) {
       debugPrint('Failed to create sheet: $e');
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToCreateSheet}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToCreateSheet}: ${e.toString()}',
+      );
     }
   }
 
@@ -265,15 +240,7 @@ class SheetsController extends GetxController {
     try {
       final userId = ServiceLocator.authService.getCurrentUserId();
       if (userId == null) {
-        if (_context != null) {
-          ScaffoldMessenger.of(_context!).showSnackBar(
-            const SnackBar(
-              content: Text(AppStrings.userNotAuthenticated),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        SnackbarUtil.show(_context, AppStrings.userNotAuthenticated);
         return;
       }
 
@@ -285,26 +252,13 @@ class SheetsController extends GetxController {
       // Remove sheet from list
       sheetsWithLastEntry.removeWhere((item) => item.sheet.id == sheetId);
 
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.sheetDeletedSuccessfully),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.sheetDeletedSuccessfully);
     } catch (e) {
       debugPrint('Failed to delete sheet: $e');
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.failedToDeleteSheet}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        '${AppStrings.failedToDeleteSheet}: ${e.toString()}',
+      );
     }
   }
 

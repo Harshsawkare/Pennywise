@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/di/service_locator.dart';
 import '../../domain/models/category_model.dart';
+import '../../core/utils/snackbar_util.dart';
 
 /// Controller for managing add/edit category screen state
 /// Handles category creation and editing
@@ -129,15 +130,10 @@ class AddEditCategoryController extends GetxController {
       }
     } catch (e) {
       // Show error message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceFirst('Exception: ', '')),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
       rethrow;
     }
   }
@@ -153,15 +149,7 @@ class AddEditCategoryController extends GetxController {
       await _userController.deleteCategory(editingCategory!);
 
       // Show success message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.categoryDeletedSuccessfully),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(_context, AppStrings.categoryDeletedSuccessfully);
 
       // Navigate back on success
       if (_context != null) {
@@ -169,17 +157,10 @@ class AddEditCategoryController extends GetxController {
       }
     } catch (e) {
       // Show error message
-      if (_context != null) {
-        ScaffoldMessenger.of(_context!).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString().replaceFirst('Exception: ', ''),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      SnackbarUtil.show(
+        _context,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
       rethrow;
     }
   }
